@@ -1,0 +1,29 @@
+#!/usr/bin/env php
+<?php
+
+define('ROOT', $_SERVER['PWD'] . '/');
+
+foreach (
+    [
+        __DIR__ . '/',
+        __DIR__ . '/../',
+        __DIR__ . '/../../',
+        __DIR__ . '/../../../',
+    ] as $path
+) {
+    $file = $path . 'vendor/autoload.php';
+    if (file_exists($file)) {
+        define('AUTOLOAD', $file);
+        break;
+    }
+}
+
+unset($path);
+unset($file);
+
+require AUTOLOAD;
+
+use IrfanTOOR\Test\Command\TestCommand;
+
+$cmd = new TestCommand(ROOT);
+$cmd->run();

@@ -1,0 +1,26 @@
+{
+    "name": "irfantoor/test",
+    "description": "test without a twist",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Irfan TOOR",
+            "email": "email@irfantoor.com"
+        }
+    ],
+    "require": {
+        "irfantoor/debug": "^0.3.0",
+        "irfantoor/console": "^0.4.0",
+        "irfantoor/command": "^0.1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "IrfanTOOR\\": "src/",
+            "IrfanTOOR\\Test\\": "src/"
+        }
+    },
+    "bin": [
+        "test"
+    ]
+}

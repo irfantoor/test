@@ -139,6 +139,8 @@ class TestTheTest extends Test
 
     function testAssertNotEquals()
     {
+        $a = 6;
+        $b = 6;
         $b++;
         $this->assertNotEquals($a, $b);
         $this->assertNotEquals('12345', 1234);
@@ -223,5 +225,11 @@ class TestTheTest extends Test
             $e = new ExtendedClass;
             $e->gf();
         });
+    }
+
+    # this test must be skipped!
+    function testMethodRaisesException()
+    {
+        $this->assertException();
     }
 }

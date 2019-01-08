@@ -3,6 +3,8 @@
 namespace IrfanTOOR\Test\Command;
 
 use IrfanTOOR\Command;
+use Exception;
+use ArgumentCountError;
 
 class TestCommand extends Command
 {
@@ -14,7 +16,10 @@ class TestCommand extends Command
 
         parent::__construct(
             'test',
-            'testing without a twist'
+            'testing without a twist',
+            null,
+            '0.1',
+            true
         );
 
         $this->addOption('f', 'failed', 'Show failed only tests');
@@ -31,6 +36,16 @@ class TestCommand extends Command
 
     function main()
     {
+        # verbose
+        $v = $this->getOption('verbose');
+        if ( $v === 0)
+            error_reporting(0);
+        elseif ($v === 1)
+            error_reporting(E_ALL && ~E_NOTICE);
+        else
+            error_reporting(E_ALL);
+
+
         $this->writeln($this->name . ' ' . $this->version, 'bold');
 
         $quite   = $this->getOption('quite');
@@ -83,7 +98,9 @@ class TestCommand extends Command
             $class = str_replace('.php' , '', $file);
             $class = preg_replace('|.*\/|s' , '', $class);
             $test = new $class(compact(['quite', 'failed', 'testdox']));
+
             $r = $test->run();
+
             $count[0] += $r[0];
             $count[1] += $r[1];
 

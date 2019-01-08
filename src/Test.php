@@ -9,8 +9,8 @@ class Test
 {
     protected $options;
 
-    protected $count, $passed;
-    protected $tcount, $tpassed;
+    protected $count = 0, $passed = 0;
+    protected $tcount = 0, $tpassed = 0;
     protected $traces = [];
 
     function __construct($options = []) {
@@ -28,9 +28,37 @@ class Test
 
     function setup() {}
 
+    private function _limitVar($var)
+    {
+        ob_start();
+        var_dump($var);
+        $result = ob_get_clean();
+        $lines = explode("\n", $result);
+        $line = $lines[0];
+        if (count($lines) > 2)
+            $line .= ' ...';
+
+        return $line;
+    }
+
+    function getTrace()
+    {
+        $t = debug_backtrace();
+        $trace = $t[1];
+        foreach($t as $tt) {
+            if (isset($tt['file']) && strpos($tt['file'], '/src/Test.php') === false) {
+                $trace = $tt;
+                break;
+            }
+        }
+
+        return $trace;        
+    }
+
     function run()
     {
         $c = new Console();
+
         $methods = get_class_methods($this);
         foreach($methods as $method) {
             preg_match_all('|test.*|uS', $method, $m);
@@ -42,8 +70,26 @@ class Test
 
             try {
                 $this->$method();
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
+                $trace = $this->getTrace();
+                $c->writeln("  [  ] $method (skipped)", 'red');
 
+                if (!$this->options['testdox']) {
+                    $c->write('       ');
+                    $c->writeln('Exception: ' . $e->getMessage(), 'dark');
+                    $c->writeln('');
+                }
+                continue;
+            } catch (\Error $e) {
+                $trace = $this->getTrace();
+                $c->writeln("  [  ] $method (skipped)", 'red');
+
+                if (!$this->options['testdox']) {
+                    $c->write('       ');
+                    $c->writeln('Error: ' . $e->getMessage(), 'dark');
+                    $c->writeln('');
+                }
+                continue;
             }
 
             $result = ' ' . ob_get_clean() . ' ';
@@ -64,29 +110,34 @@ class Test
             $this->tpassed += $this->passed;
             $this->count = $this->passed = 0;
 
-            if ($this->options['failed'] || !$this->options['testdox']) {
+            if (!$this->options['testdox']) {
                 foreach ($this->traces as $t) {
-                    $tt = $t['trace'];
-                    $c->writeln("   " . $tt['file'] . " -- [line: " .$tt['line']. "]", 'yellow');
-                    if (isset($t['info'])) {
-                        $tt = $t['info'];
-                        $c->write("expected: ", 'yellow');
-                        if ($tt[2]) {
-                            echo $tt[2] . ' ';
-                        } else {
-                            if (is_object($tt[0])) {
-                                echo explode("\n", print_r($tt[0], 1))[0];
-                            } else {
-                                var_dump($tt[0]);    
-                            }
-                        }
-                        $c->write("returned: ", 'yellow');
-                        if (is_object($tt[1])) {
-                            echo explode("\n", print_r($tt[1], 1))[0];
-                        } else {
-                            var_dump($tt[1]);    
-                        }
+                    extract($t);
+                    extract($trace);
+
+                    $l = [];
+                    $l[0] = 'expected: ';
+                    $l[0] .= $message ? $message . ' ' : '';
+
+                    if ($show)
+                        $l[0] .= $this->_limitVar($expected);
+
+                    $l[1] = 'returned: ';
+                    $l[1] .= $this->_limitVar($result);
+                    $l[1] .= " -> line: $line";
+
+                    $max = 0;
+                    foreach ($l as $v) {
+                        $max = max($max, strlen($v));
                     }
+
+                    foreach ($l as $k => $v) {
+                        $pad = str_repeat(' ', $max - strlen($v));
+                        $c->write('       ');
+                        $c->write(' ', 'bg_red');
+                        $c->writeln(' ' . $v . $pad . ' ', ['bg_yellow', 'black']);
+                    }
+                    $c->writeln('');
                 }
             }
 
@@ -99,7 +150,7 @@ class Test
         ];
     }
 
-    function assert($expected, $exp, $result, $type = null)
+    function assert($expected, $exp, $result, $message = '', $show = true)
     {
         $this->count++;
         if ($this->count % 64 == 0)
@@ -125,7 +176,6 @@ class Test
 
             default:
                 $r = false;
-
         }
 
         if ($r) {
@@ -134,10 +184,12 @@ class Test
                 echo ".";
             return true;
         } else {
-            $t = debug_backtrace();
             $this->traces[] = [
-                'trace' => $t[1],
-                'info' => [$expected, $result, $type],
+                'trace' => $this->getTrace(),
+                'expected' => $expected,
+                'result' => $result,
+                'message' => $message,
+                'show' => $show
             ];
             if (!$this->options['testdox'])
                 echo "F";
@@ -147,22 +199,22 @@ class Test
 
     function assertEquals($exp, $res)
     {
-        $this->assert($exp, '==', $res);
+        $this->assert($exp, '==', $res, 'equal to');
     }    
 
     function assertNotEquals($exp, $res)
     {
-        $this->assert($exp, '!=', $res);
+        $this->assert($exp, '!=', $res, 'not equal to');
     }
 
     function assertSame($exp, $res)
     {
-        $this->assert($exp, '===', $res);
+        $this->assert($exp, '===', $res, 'same as');
     }
 
     function assertNotSame($exp, $res)
     {
-        $this->assert($exp, '!==', $res);
+        $this->assert($exp, '!==', $res, 'not same as');
     }
 
     function assertTrue($res)
@@ -195,7 +247,7 @@ class Test
         if (is_string($var)) {
             $this->assert(true, '===', is_string($var));
         } else {
-            $this->assert($var, '!==', $var, 'string');
+            $this->assert($var, '!==', $var, 'a string', false);
         }
     }
 
@@ -204,7 +256,7 @@ class Test
         if (!is_string($var)) {
             $this->assert(false, '===', is_string($var));
         } else {
-            $this->assert($var, '!==', $var, 'non_string');
+            $this->assert(null, '===', $var, 'a non-string', false);
         }
     }
 
@@ -213,7 +265,7 @@ class Test
         if (is_object($var)) {
             $this->assert(true, '===', is_object($var));
         } else {
-            $this->assert($var, '!==', $var, 'object');
+            $this->assert($var, '!==', $var, 'an object', false);
         }
     }
 
@@ -222,7 +274,7 @@ class Test
         if (!is_object($var)) {
             $this->assert(false, '===', is_object($var));
         } else {
-            $this->assert($var, '!==', $var, 'non_object');
+            $this->assert($var, '!==', $var, 'a non-object', false);
         }
     }
 
@@ -233,11 +285,13 @@ class Test
             if (in_array($instance, $parents))
             {
                 $this->assert($instance, '===', $parents[$instance]);
-            } else {
+            } elseif ($instance === get_class($class)) {
                 $this->assert($instance, '===', get_class($class));
+            } else {
+                $this->assert($instance, '===', $class, "instance of " . $instance, false);
             }
         } else {
-            $this->assert($class, '!==', $class, 'class');
+            $this->assert($class, '!==', $class, "instance of " . $instance, false);
         }
     }
 
@@ -248,11 +302,13 @@ class Test
             if (in_array($instance, $interfaces))
             {
                 $this->assert($instance, '===', $interfaces[$instance]);
-            } else {
+            } elseif ($instance === get_class($class)) {
                 $this->assert($instance, '===', get_class($class));
+            } else {
+                 $this->assert($instance, '===', $class, "Implimentation of " . $instance, false);
             }
         } else {
-            $this->assert($class, '!==', $class, 'class');
+            $this->assert($class, '!==', $class, "Implimentation of " . $instance, false);
         }
     }
 
@@ -277,7 +333,7 @@ class Test
             if (is_callable($f))
                 $f();
 
-            $this->assert($f, '!==', $f, 'exception');
+            $this->assert($f, '!==', $f, 'instance of Exception', false);
         } catch (Exception $e) {
             $this->assert($msg, '===', $e->getMessage());
         }

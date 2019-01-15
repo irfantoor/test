@@ -1,18 +1,3 @@
-# IrfanTOOR\Test
-
-Test without a twist.
-
-Require it using composer:
-```sh
-$ composer require --dev irfantoor/test
-```
-
-## Usage with an example
-
-file: examples/TestMyClass.php
-[note: name must match with the test class name]
-
-```php
 <?php
 
 use IrfanTOOR\Test;
@@ -155,22 +140,3 @@ class TestMyClass extends Test
         $this->assertEquals('1');
     }
 }
-
-```
-
-```sh
-$ ./test examples/TestMyClass.php
-                     
-  test 0.1           
-  test with a twist  
-                     
-
-examples/TestMyClass.php
-  [57] testExamples .................................F........................  [1]
-         expected: not zero             
-         returned: float(0) -> line: 84 
-
-  [  ] testSkip (skipped) line: 140 >>  Exception: Too few arguments to function IrfanTOOR\Test::assertEquals() 
-
-   57 passed     1 failed  
-```

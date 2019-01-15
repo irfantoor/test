@@ -7,15 +7,34 @@ use IrfanTOOR\Console;
 
 class Test
 {
+    # types which can be tested with is_ prefix.
+    protected static $types = [
+
+        # simple ...
+        'array', 'bool', 'null', 'string', # 'empty',
+
+        # numeric ...
+        'double', 'float', 'int', 'integer', 'long',  'numeric', 'real', 'scalar', # 'zero'
+
+        # mixed
+        'callable', 'object', 'resource', 
+
+        # filesystem ...
+        'dir', 'executable', 'file', 'link', 'readable', 'writable', 'writeable', 'uploaded_file', 
+    ];
+
     protected $options;
 
     protected $count = 0, $passed = 0;
-    protected $tcount = 0, $tpassed = 0;
+    // protected $tcount = 0, $tpassed = 0;
+    protected $assertions;
     protected $traces = [];
 
     function __construct($options = []) {
         $defaults = [
             'testdox' => false,
+            'quite'   => false,
+            'failed'  => false, 
         ];
 
         foreach ($defaults as $k => $v) {
@@ -59,6 +78,11 @@ class Test
     {
         $c = new Console();
 
+        # comvert options into variables: e.g. $option_failed, $option_testdox etc.
+        foreach ($this->options as $option) {
+            ${'option_' . $option['long']} = $option['value'];
+        }
+
         $methods = get_class_methods($this);
         foreach($methods as $method) {
             preg_match_all('|test.*|uS', $method, $m);
@@ -66,36 +90,42 @@ class Test
                 continue;
 
             $this->setup();
-            ob_start();
-
+            
             try {
+                $e = null;
+                ob_start();
                 $this->$method();
             } catch (\Exception $e) {
-                $trace = $this->getTrace();
-                $c->writeln("  [  ] $method (skipped)", 'red');
-
-                if (!$this->options['testdox']) {
-                    $c->write('       ');
-                    $c->writeln('Exception: ' . $e->getMessage(), 'dark');
-                    $c->writeln('');
-                }
-                continue;
             } catch (\Error $e) {
-                $trace = $this->getTrace();
-                $c->writeln("  [  ] $method (skipped)", 'red');
+            }
 
-                if (!$this->options['testdox']) {
-                    $c->write('       ');
-                    $c->writeln('Error: ' . $e->getMessage(), 'dark');
+            if ($e) {
+                ob_get_clean();
+
+                # $trace = $this->getTrace();
+                $c->write("  [  ] $method (skipped) ", 'red');
+
+                if (!$option_testdox) {
+                    $c->write('line: ' . $e->getTrace()[0]['line'] . ' >> ', 'light_red');
+                    $short_message = explode(',', $e->getMessage())[0];
+                    $c->writeln(' Exception: ' . $short_message . ' ', 'dark');
+                } else {
                     $c->writeln('');
                 }
+
+                $this->assertions[$method] = [
+                    'passed' => 0,
+                    'failed' => 0,
+                    'skipped' => 1,
+                ];
+
                 continue;
             }
 
             $result = ' ' . ob_get_clean() . ' ';
 
             if ($this->passed == $this->count) {
-                if (!$this->options['failed']) {
+                if (!$option_failed) {
                     $c->write(sprintf('  [%2d] %s', $this->passed, $method), 'green');
                     $c->writeln($result);
                 }
@@ -106,11 +136,14 @@ class Test
                 $c->writeln(' [' . ($this->count - $this->passed) . ']', 'red');
             }
 
-            $this->tcount += $this->count;
-            $this->tpassed += $this->passed;
+            $this->assertions[$method] = [
+                'passed' => $this->passed,
+                'failed' => $this->count - $this->passed,
+            ];
+
             $this->count = $this->passed = 0;
 
-            if (!$this->options['testdox']) {
+            if (!$option_testdox) {
                 foreach ($this->traces as $t) {
                     extract($t);
                     extract($trace);
@@ -119,7 +152,7 @@ class Test
                     $l[0] = 'expected: ';
                     $l[0] .= $message ? $message . ' ' : '';
 
-                    if ($show)
+                    if ($message === '')
                         $l[0] .= $this->_limitVar($expected);
 
                     $l[1] = 'returned: ';
@@ -144,18 +177,21 @@ class Test
             $this->traces = [];
         }
 
-        return [
-            $this->tcount,
-            $this->tpassed
-        ];
+        return $this->assertions;
     }
 
-    function assert($expected, $exp, $result, $message = '', $show = true)
+    function assert($expected, $exp, $result, $message = '')
     {
+
+        # comvert options into variables: e.g. $option_failed, $option_testdox etc.
+        foreach ($this->options as $option) {
+            ${'option_' . $option['long']} = $option['value'];
+        }
+
         $this->count++;
         if ($this->count % 64 == 0)
-            if (!$this->options['testdox'])
-                echo "    ";
+            if (!$option_testdox)
+                echo PHP_EOL . "       ";
 
         switch ($exp) {
             case '==':
@@ -180,7 +216,7 @@ class Test
 
         if ($r) {
             $this->passed++;
-            if (!$this->options['testdox'])
+            if (!$option_testdox)
                 echo ".";
             return true;
         } else {
@@ -189,109 +225,271 @@ class Test
                 'expected' => $expected,
                 'result' => $result,
                 'message' => $message,
-                'show' => $show
             ];
-            if (!$this->options['testdox'])
+            if (!$option_testdox)
                 echo "F";
             return false;
         }
     }
 
-    function assertEquals($exp, $res)
+    function assertEquals($exp, $var)
     {
-        $this->assert($exp, '==', $res, 'equal to');
+        return $this->assert($exp, '==', $var, 'equal to ' . $this->_limitVar($exp));
     }    
 
-    function assertNotEquals($exp, $res)
+    function assertNotEquals($exp, $var)
     {
-        $this->assert($exp, '!=', $res, 'not equal to');
+        return $this->assert($exp, '!=', $var, 'not equal to ' . $this->_limitVar($exp));
     }
 
     function assertSame($exp, $res)
     {
-        $this->assert($exp, '===', $res, 'same as');
+        return $this->assert($exp, '===', $res, 'same as ' . $this->_limitVar($exp));
     }
 
     function assertNotSame($exp, $res)
     {
-        $this->assert($exp, '!==', $res, 'not same as');
+        return $this->assert($exp, '!==', $res, 'not same as ' . $this->_limitVar($exp));
+    }
+    
+    function assertArray($var)
+    {
+        return $this->assertInternalType('array', $var);
     }
 
-    function assertTrue($res)
+    function assertNotArray($var)
     {
-        return $this->assert(true, '===', $res);
+        return $this->assertNotInternalType('array', $var);
     }
 
-    function assertFalse($res)
+    function assertArrayHasKey($key, $array)
     {
-        return $this->assert(false, '===', $res);
+        $this->assert(true, '===', is_array($array) && array_key_exists($key, $array), 
+            'array has key: ' . $key);
+    }
+
+    function assertBool($var)
+    {
+        return $this->assertInternalType('bool', $var);
+    }
+
+    function assertNotBool($var)
+    {
+        return $this->assertNotInternalType('bool', $var);
+    }
+
+    function assertFalse($var)
+    {
+        return $this->assert(false, '===', $var);
+    }    
+
+    function assertTrue($var)
+    {
+        return $this->assert(true, '===', $var);
     }
 
     function assertNull($var)
     {
-        return $this->assert(null, '===', $var);
+        return $this->assertInternalType('null', $var);
     }
 
     function assertNotNull($var)
     {
-        return $this->assert(null, '!==', $var);
-    }
-
-    function assertZero($var)
-    {
-        return $this->assert(0, '===', $var);
-    }
+        return $this->assertNotInternalType('null', $var);
+    }    
 
     function assertString($var)
     {
-        if (is_string($var)) {
-            $this->assert(true, '===', is_string($var));
-        } else {
-            $this->assert($var, '!==', $var, 'a string', false);
-        }
+        return $this->assertInternalType('string', $var);
     }
 
     function assertNotString($var)
     {
-        if (!is_string($var)) {
-            $this->assert(false, '===', is_string($var));
+        return $this->assertNotInternalType('string', $var);
+    }
+
+    function assertEmpty($var)
+    {
+        if(is_string($var)) {
+            $this->assert('', '===', $var, 'empty');
+        } elseif(is_array($var)) {
+            $this->assert([], '===', $var, 'empty');
         } else {
-            $this->assert(null, '===', $var, 'a non-string', false);
+            $this->assert(null, '===', $var, 'empty');
         }
+    }
+
+    function assertNotEmpty($var)
+    {
+        if(is_string($var)) {
+            $this->assert('', '!==', $var, 'not empty');
+        } elseif(is_array($var)) {
+            $this->assert([], '!==', $var, 'not empty');
+        } else {
+            $this->assert(null, '!==', $var, 'not empty');
+        }
+    }
+
+   function assertDouble($var)
+    {
+        return $this->assertInternalType('double', $var);
+    }
+
+    function assertNotDouble($var)
+    {
+        return $this->assertNotInternalType('double', $var);
+    }
+
+    function assertFloat($var)
+    {
+        return $this->assertInternalType('float', $var);
+    }
+
+    function assertNotFloat($var)
+    {
+        return $this->assertNotInternalType('float', $var);
+    }
+
+    function assertInt($var)
+    {
+        return $this->assertInternalType('int', $var);
+    }
+
+    function assertNotInt($var)
+    {
+        return $this->assertNotInternalType('int', $var);
+    }
+
+    function assertInteger($var)
+    {
+        return $this->assertInternalType('int', $var);
+    }
+
+    function assertNotInteger($var)
+    {
+        return $this->assertNotInternalType('int', $var);
+    }
+
+    function assertLong($var)
+    {
+        return $this->assertInternalType('long', $var);
+    }
+
+    function assertNotLong($var)
+    {
+        return $this->assertNotInternalType('long', $var);
+    }
+
+    function assertNumeric($var)
+    {
+        return $this->assertInternalType('numeric', $var);
+    }
+
+    function assertNotNumeric($var)
+    {
+        return $this->assertNotInternalType('numeric', $var);
+    }
+
+    function assertReal($var)
+    {
+        return $this->assertInternalType('real', $var);
+    }
+
+    function assertNotReal($var)
+    {
+        return $this->assertNotInternalType('real', $var);
+    }
+
+    function assertScalar($var)
+    {
+        return $this->assertInternalType('scalar', $var);
+    }
+
+    function assertNotScalar($var)
+    {
+        return $this->assertNotInternalType('scalar', $var);
+    }    
+
+    function assertZero($var)
+    {
+        if (is_real($var)) {
+            return $this->assert(0.0, '===', $var, 'zero');
+        } else {
+            return $this->assert(0, '===', $var, 'zero');
+        }
+    }    
+
+    function assertNotZero($var)
+    {
+        if (is_real($var)) {
+            return $this->assert(0.0, '!==', $var, 'not zero');
+        } else {
+            return $this->assert(0, '!==', $var, 'not zero');
+        }
+    }    
+
+    function assertCallable($var)
+    {
+        return $this->assertInternalType('callable', $var);
+    }
+
+    function assertNotCallable($var)
+    {
+        return $this->assertNotInternalType('callable', $var);
     }
 
     function assertObject($var)
     {
-        if (is_object($var)) {
-            $this->assert(true, '===', is_object($var));
-        } else {
-            $this->assert($var, '!==', $var, 'an object', false);
-        }
+        return $this->assertInternalType('object', $var);
     }
 
     function assertNotObject($var)
     {
-        if (!is_object($var)) {
-            $this->assert(false, '===', is_object($var));
-        } else {
-            $this->assert($var, '!==', $var, 'a non-object', false);
-        }
+        return $this->assertNotInternalType('object', $var);
+    }
+
+    function assertResource($var)
+    {
+        return $this->assertInternalType('resource', $var);
+    }
+
+    function assertNotResource($var)
+    {
+        return $this->assertNotInternalType('resource', $var);
     }
 
     function assertInstanceOf($instance, $class)
+    {
+        # 'subclass_of', is_a(object, class_name)
+        if (is_object($class)) {
+            $parents = class_parents($class);
+            if (in_array($instance, $parents))
+            {
+                return $this->assert($instance, '===', $parents[$instance]);
+            } elseif ($instance === get_class($class)) {
+                return $this->assert($instance, '===', get_class($class));
+            } else {
+                return $this->assert($instance, '===', $class, "instance of " . $instance, false);
+            }
+        } else {
+            return $this->assert($class, '!==', $class, "instance of " . $instance, false);
+        }
+    }
+
+    function assertNotInstanceOf($instance, $class)
     {
         if (is_object($class)) {
             $parents = class_parents($class);
             if (in_array($instance, $parents))
             {
-                $this->assert($instance, '===', $parents[$instance]);
+                return $this->assert($instance, '===', $parents[$instance], 'not an instance of ' . $instance, false);
             } elseif ($instance === get_class($class)) {
-                $this->assert($instance, '===', get_class($class));
+                return $this->assert($instance, '!==', get_class($class), 'not an instance of ' . $instance, false);
             } else {
-                $this->assert($instance, '===', $class, "instance of " . $instance, false);
+                return $this->assert($instance, '!==', $class, 'not an instance of' . $instance, false);
             }
         } else {
-            $this->assert($class, '!==', $class, "instance of " . $instance, false);
+            return $this->assert($class, '===', $class);
         }
     }
 
@@ -301,18 +499,18 @@ class Test
             $interfaces = class_implements($class);
             if (in_array($instance, $interfaces))
             {
-                $this->assert($instance, '===', $interfaces[$instance]);
+                return $this->assert($instance, '===', $interfaces[$instance]);
             } elseif ($instance === get_class($class)) {
-                $this->assert($instance, '===', get_class($class));
+                return $this->assert($instance, '===', get_class($class));
             } else {
-                 $this->assert($instance, '===', $class, "Implimentation of " . $instance, false);
+                 return $this->assert($instance, '===', $class, "Implimentation of " . $instance, false);
             }
         } else {
-            $this->assert($class, '!==', $class, "Implimentation of " . $instance, false);
+            return $this->assert($class, '!==', $class, "Implimentation of " . $instance, false);
         }
     }
 
-    function assertException($f)
+    function assertException($f, $class = 'Exception', $message = null)
     {
         $e = null;
         try {
@@ -322,8 +520,14 @@ class Test
             $e = $f;
         } catch (Exception $e) {
         }
-
-        $this->assertInstanceOf(Exception::class, $e);
+        
+        if ($message !== null) {
+            if ($e) {
+                return $this->assertEquals($message, $e->getMessage());
+            } else {
+                return $this->assertInstanceOf($class, $e);
+            }
+        }
     }
 
     function assertExceptionMessage($msg, $f)
@@ -333,9 +537,117 @@ class Test
             if (is_callable($f))
                 $f();
 
-            $this->assert($f, '!==', $f, 'instance of Exception', false);
+            $this->assert($f, '!==', $f, 'Exception', false);
         } catch (Exception $e) {
             $this->assert($msg, '===', $e->getMessage());
         }
-    }    
+    }   
+
+
+
+
+
+
+    function assertDir($var)
+    {
+        return $this->assertInternalType('dir', $var);
+    }
+
+    function assertNotDir($var)
+    {
+        return $this->assertNotInternalType('dir', $var);
+    }
+
+
+    function assertExecutable($var)
+    {
+        return $this->assertInternalType('executable', $var);
+    }
+
+    function assertNotExecutable($var)
+    {
+        return $this->assertNotInternalType('executable', $var);
+    }
+
+    function assertFile($var)
+    {
+        return $this->assertInternalType('file', $var);
+    }
+
+    function assertNotFile($var)
+    {
+        return $this->assertNotInternalType('file', $var);
+    }
+
+    function assertLink($var)
+    {
+        return $this->assertInternalType('link', $var);
+    }
+
+    function assertNotLink($var)
+    {
+        return $this->assertNotInternalType('link', $var);
+    }
+
+    function assertReadable($var)
+    {
+        return $this->assertInternalType('readable', $var);
+    }
+
+    function assertNotReadable($var)
+    {
+        return $this->assertNotInternalType('readable', $var);
+    }
+
+    function assertWritable($var)
+    {
+        return $this->assertInternalType('writable', $var);
+    }
+
+    function assertNotWritable($var)
+    {
+        return $this->assertNotInternalType('writable', $var);
+    }
+
+    function assertWriteable($var)
+    {
+        return $this->assertInternalType('writeable', $var);
+    }
+
+    function assertNotWriteable($var)
+    {
+        return $this->assertNotInternalType('writeable', $var);
+    }
+
+    function assertUploadedFile($var)
+    {
+        return $this->assertInternalType('uploaded_file', $var);
+    }
+
+    function assertNotUploadedFile($var)
+    {
+        return $this->assertNotInternalType('uploaded_file', $var);
+    }
+
+    function assertInternalType($type, $var)
+    {
+        if (in_array($type, self::$types)) {
+            $f = 'is_' . $type;
+            $r = $f($var) ? $var : ($var === null ? 'NULL' : null);
+            $this->assert($r, '===', $var, $type, false);
+        } else {
+            throw new Exception("unknown-type ($type)", 1);
+        }
+    }
+
+    function assertNotInternalType($type, $var)
+    {
+        if (in_array($type, self::$types)) {
+            $f = 'is_' . $type;
+            $r = !$f($var) ? $var : ($var === null ? 'NULL' : null);
+            $this->assert($r, '===', $var, 'not ' . $type, false);
+        } else {
+            throw new Exception("unknown-type ($type)", 1);
+        }
+    }
 }

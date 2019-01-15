@@ -9,18 +9,24 @@ use ArgumentCountError;
 class TestCommand extends Command
 {
     protected $root;
+    protected $error;
+
+    protected $total;
 
     function __construct($path)
     {
         $this->root = $path;
+        $this->error = true;
 
         parent::__construct(
             'test',
-            'testing without a twist',
+            'test with a twist',
             null,
             '0.1',
             true
         );
+
+        register_shutdown_function([$this, 'shutdown']);
 
         $this->addOption('f', 'failed', 'Show failed only tests');
         $this->addOption('t', 'testdox', 'Do not print the result of individual tests');
@@ -45,8 +51,7 @@ class TestCommand extends Command
         else
             error_reporting(E_ALL);
 
-
-        $this->writeln($this->name . ' ' . $this->version, 'bold');
+        $this->writeln([$this->name . ' ' . $this->version, $this->description], ['blue', 'bold']);
 
         $quite   = $this->getOption('quite');
         $failed  = $this->getOption('failed');
@@ -56,10 +61,14 @@ class TestCommand extends Command
 
         $c = $this->console;
 
-        $count = [0, 0];
+        $this->total = [
+            'passed' => 0,
+            'failed' => 0,
+        ];
 
-        if ($quite)
+        if ($quite) {
             ob_start();
+        }
 
         if (is_dir($this->root . $filter)) {
             $path = rtrim($filter, '/') . '/';
@@ -93,25 +102,58 @@ class TestCommand extends Command
 
         foreach ($files as $file) {
             $c->writeln($file);
+
             require $this->root . $path . $file;
 
             $class = str_replace('.php' , '', $file);
             $class = preg_replace('|.*\/|s' , '', $class);
-            $test = new $class(compact(['quite', 'failed', 'testdox']));
+            $test = new $class($this->options);
 
             $r = $test->run();
 
-            $count[0] += $r[0];
-            $count[1] += $r[1];
+            $passed = $failed = 0;
+            foreach($r as $m) {
+                $passed += $m['passed'];
+                $failed += $m['failed'];
+            }
 
+            $this->total['passed'] += $passed;
+            $this->total['failed'] += $failed;
         }
 
-        if ($quite)
+        if ($quite) {
             ob_get_clean();
+        }
 
-        $c->writeln('');
-        $c->write(sprintf("%5d passed ", $count[1]), ['bg_green', 'white', 'bold']);
-        $style = ($count[0] == $count[1] ? ['bg_green', 'white'] : ['bg_red', 'white']);
-        $c->writeln(sprintf(" %d failed ", ($count[0] - $count[1])), $style);
+        $this->error = false;
+    }
+
+    function Shutdown()
+    {
+        $c = $this->console;
+
+        if (($this->getOption('verbose') === 0) && $this->error) {
+            $last_error = error_get_last();
+            if ($last_error) {
+                extract($last_error);
+
+                #$c->write(" (skipped) ", 'blue');
+                $c->write('Fatal error -- line: ' . $line . ' >> ', ['bg_red', 'white']);
+                $short_message = explode(',', $message)[0];
+                $c->writeln("$short_message", ['bg_red', 'white']);
+            }
+        }
+
+        if ($this->total) {
+            extract($this->total);
+
+            $bg = ($passed !== 0) ? "bg_green" : "bg_black";
+            $fg = ($passed !== 0) ? "white" : "dark";
+
+            $c->writeln('');
+            $c->write(sprintf("%5d passed ", $passed), [$bg, $fg]);
+            $style = ($failed === 0 ? [$bg, $fg] : ['bg_red', 'white']);
+            $c->writeln(sprintf("%5d failed ", $failed), $style);
+        }
     }
 }

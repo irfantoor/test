@@ -1,6 +1,6 @@
 # IrfanTOOR\Test
 
-Test without a twist.
+Test with a twist.
 
 Require it using composer:
 ```sh

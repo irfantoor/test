@@ -22,7 +22,7 @@ class TestCommand extends Command
             'test',
             'test with a twist',
             null,
-            '0.1',
+            null,
             true
         );
 

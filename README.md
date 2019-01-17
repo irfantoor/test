@@ -159,9 +159,8 @@ class TestMyClass extends Test
 ```
 
 ```sh
-$ ./test examples/TestMyClass.php
                      
-  test 0.1           
+  test 0.3.2         
   test with a twist  
                      
 
@@ -172,5 +171,5 @@ examples/TestMyClass.php
 
   [  ] testSkip (skipped) line: 140 >>  Exception: Too few arguments to function IrfanTOOR\Test::assertEquals() 
 
-   57 passed     1 failed  
+   57 passed     1 failed 
 ```

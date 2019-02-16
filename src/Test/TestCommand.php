@@ -1,36 +1,34 @@
 <?php
 
-namespace IrfanTOOR\Test\Command;
+namespace IrfanTOOR\Test;
 
-use IrfanTOOR\Command;
-use Exception;
 use ArgumentCountError;
+use Exception;
+use IrfanTOOR\Command;
+use IrfanTOOR\Test\Constants;
 
 class TestCommand extends Command
 {
     protected $root;
-    protected $error;
-
     protected $total;
 
     function __construct($path)
     {
         $this->root = $path;
-        $this->error = true;
 
         parent::__construct(
-            'test',
-            'test with a twist',
+            Constants::NAME,
+            Constants::DESCRIPTION,
             null,
-            null,
+            Constants::VERSION,
             true
         );
 
         register_shutdown_function([$this, 'shutdown']);
 
-        $this->addOption('f', 'failed', 'Show failed only tests');
+        $this->addOption('f', 'failed',  'Show failed only tests');
         $this->addOption('t', 'testdox', 'Do not print the result of individual tests');
-        $this->addOption('q', 'quite',  'Only prints the final result');
+        $this->addOption('q', 'quite',   'Only prints the final result');
 
         $this->addOperand(
             'filter', 
@@ -44,6 +42,7 @@ class TestCommand extends Command
     {
         # verbose
         $v = $this->getOption('verbose');
+
         if ( $v === 0)
             error_reporting(0);
         elseif ($v === 1)
@@ -56,8 +55,7 @@ class TestCommand extends Command
         $quite   = $this->getOption('quite');
         $failed  = $this->getOption('failed');
         $testdox = $this->getOption('testdox');
-
-        $filter = $this->getOperand('filter');
+        $filter  = $this->getOperand('filter');
 
         $c = $this->console;
 
@@ -72,7 +70,7 @@ class TestCommand extends Command
 
         if (is_dir($this->root . $filter)) {
             $path = rtrim($filter, '/') . '/';
-            $filter = '*Tests.php';
+            $filter = '.*Test\.php';
             $files = null;
         } elseif (is_file($this->root . $filter)) {
             $path = "";
@@ -90,7 +88,7 @@ class TestCommand extends Command
                 if ($file === '.' || $file === '..')
                     continue;
 
-                preg_match_all('|.*\.php|s', $file, $m);
+                preg_match_all('|' . $filter . '|s', $file, $m);
                 if (!isset($m[0][0]))
                     continue;
 
@@ -125,22 +123,23 @@ class TestCommand extends Command
             ob_get_clean();
         }
 
-        $this->error = false;
+        define('__NOTHING_LEFT_TO_PROCESS__', 1);
     }
 
     function Shutdown()
     {
         $c = $this->console;
-
-        if (($this->getOption('verbose') === 0) && $this->error) {
+        if (!defined('__NOTHING_LEFT_TO_PROCESS__')) {
             $last_error = error_get_last();
             if ($last_error) {
                 extract($last_error);
-
-                #$c->write(" (skipped) ", 'blue');
-                $c->write('Fatal error -- line: ' . $line . ' >> ', ['bg_red', 'white']);
                 $short_message = explode(',', $message)[0];
-                $c->writeln("$short_message", ['bg_red', 'white']);
+                
+                $fa   = explode('/', $file);
+                $file = array_pop($fa);
+                $file = array_pop($fa) . '/' . $file;
+
+                $c->writeln($short_message . ' >> file: ' . $file. ', line: ' . $line, ['bg_red', 'white']);
             }
         }
 

@@ -707,6 +707,8 @@ class TestTheTest extends Test
 
     function testException()
     {
+        $c = $this->count;
+
         $f = function(){
             throw new Exception("Error Processing Request", 1);
         };
@@ -721,10 +723,14 @@ class TestTheTest extends Test
             Exception::class,
             'Error Processing GF'
         );
+
+        $this->assertEquals(4, $this->count - $c);
     }
 
     function testExceptionMessage()
     {
+        $c = $this->count;
+
         $f = function(){
             throw new Exception("Error Processing Request", 1);
         };
@@ -733,5 +739,7 @@ class TestTheTest extends Test
             $e = new ExtendedClass;
             $e->gf();
         });
+
+        $this->assertEquals(2, $this->count - $c);
     }
 }

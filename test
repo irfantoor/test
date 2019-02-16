@@ -23,7 +23,7 @@ unset($file);
 
 require AUTOLOAD;
 
-use IrfanTOOR\Test\Command\TestCommand;
+use IrfanTOOR\Test\TestCommand;
 
 $cmd = new TestCommand(ROOT);
 $cmd->run();

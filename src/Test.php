@@ -31,17 +31,6 @@ class Test
     protected $traces = [];
 
     function __construct($options = []) {
-        $defaults = [
-            'testdox' => false,
-            'quite'   => false,
-            'failed'  => false, 
-        ];
-
-        foreach ($defaults as $k => $v) {
-            if (!array_key_exists($k, $options))
-                $options[$k] = $v;
-        }
-
         $this->options = $options;
     }
 
@@ -80,7 +69,8 @@ class Test
 
         # comvert options into variables: e.g. $option_failed, $option_testdox etc.
         foreach ($this->options as $option) {
-            ${'option_' . $option['long']} = $option['value'];
+            $name = 'option_' . $option['long'];
+            $$name = $option['value'];
         }
 
         $methods = get_class_methods($this);
@@ -185,7 +175,8 @@ class Test
 
         # comvert options into variables: e.g. $option_failed, $option_testdox etc.
         foreach ($this->options as $option) {
-            ${'option_' . $option['long']} = $option['value'];
+            $name = 'option_' . $option['long'];
+            $$name = $option['value'];
         }
 
         $this->count++;
@@ -520,13 +511,11 @@ class Test
             $e = $f;
         } catch (Exception $e) {
         }
+
+        $this->assertInstanceOf($class, $e);
         
         if ($message !== null) {
-            if ($e) {
-                return $this->assertEquals($message, $e->getMessage());
-            } else {
-                return $this->assertInstanceOf($class, $e);
-            }
+            $this->assertEquals($message, $e->getMessage());
         }
     }
 
@@ -541,12 +530,7 @@ class Test
         } catch (Exception $e) {
             $this->assert($msg, '===', $e->getMessage());
         }
-    }   
-
-
-
-
-
+    }
 
     function assertDir($var)
     {
@@ -557,7 +541,6 @@ class Test
     {
         return $this->assertNotInternalType('dir', $var);
     }
-
 
     function assertExecutable($var)
     {

@@ -27,5 +27,5 @@ class Constants
 {
     public const NAME        = 'test';
     public const DESCRIPTION = 'and I test ...';
-    public const VERSION     = '0.3.4';
+    public const VERSION     = '0.3.5';
 }

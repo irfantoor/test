@@ -20,7 +20,7 @@ class SomeClass implements SomeInterface
     }
 }
 
-class TestMyClass extends Test
+class MyClassTest extends Test
 {
     function setup()
     {

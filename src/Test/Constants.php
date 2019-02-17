@@ -26,6 +26,6 @@ Constants.php
 class Constants
 {
     public const NAME        = 'test';
-    public const DESCRIPTION = 'and I test ...';
-    public const VERSION     = '0.3.5';
+    public const DESCRIPTION = 'and I Test ...';
+    public const VERSION     = '0.3.6';
 }

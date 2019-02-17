@@ -1,6 +1,6 @@
 # IrfanTOOR\Test
 
-Test with a twist.
+and I Test ...
 
 Require it using composer:
 ```sh
@@ -160,8 +160,8 @@ class TestMyClass extends Test
 
 ```sh
                      
-  test 0.3.5         
-  and I test ... 
+  test 0.3.6         
+  and I Test ... 
                      
 
 examples/MyClassTest.php

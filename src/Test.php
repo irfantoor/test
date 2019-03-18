@@ -17,7 +17,7 @@ class Test
         'double', 'float', 'int', 'integer', 'long',  'numeric', 'real', 'scalar', # 'zero'
 
         # mixed
-        'callable', 'object', 'resource', 
+        'callable', 'object', 'resource',
 
         # filesystem ...
         'dir', 'executable', 'file', 'link', 'readable', 'writable', 'writeable', 'uploaded_file', 
@@ -30,8 +30,11 @@ class Test
     protected $assertions;
     protected $traces = [];
 
+    protected $console;
+
     function __construct($options = []) {
         $this->options = $options;
+        $this->console = new Console();
     }
 
     function setup() {}
@@ -60,12 +63,44 @@ class Test
             }
         }
 
-        return $trace;        
+        return $trace;
+    }
+
+    function error($lines)
+    {
+        $c = $this->console;
+
+        $max = 0;
+        foreach ($lines as $v) {
+            $max = max($max, strlen($v));
+        }
+
+        $c->writeln('');
+        $i = 0;
+        foreach ($lines as $k => $v) {
+            $pad = str_repeat(' ', $max - strlen($v));
+            if ($i<=1) {
+                $c->write('       ');
+                $c->write(' ', 'bg_red');
+                $c->writeln(' ' . $v . $pad . ' ', ['bg_yellow', 'black']);
+                $i++;
+            } else {
+                $c->write('         ');
+                $c->writeln($v, ['dark']);
+            }
+        }
+    }
+
+    function shorten($path)
+    {
+        $pa = explode('/', $path);
+        $p = array_pop($pa);
+        return array_pop($pa) . '/' . $p;
     }
 
     function run()
     {
-        $c = new Console();
+        $c = $this->console;
 
         # comvert options into variables: e.g. $option_failed, $option_testdox etc.
         foreach ($this->options as $option) {
@@ -80,7 +115,7 @@ class Test
                 continue;
 
             $this->setup();
-            
+
             try {
                 $e = null;
                 ob_start();
@@ -92,13 +127,28 @@ class Test
             if ($e) {
                 ob_get_clean();
 
-                # $trace = $this->getTrace();
                 $c->write("  [  ] $method (skipped) ", 'red');
 
                 if (!$option_testdox) {
-                    $c->write('line: ' . $e->getTrace()[0]['line'] . ' >> ', 'light_red');
-                    $short_message = explode(',', $e->getMessage())[0];
-                    $c->writeln(' Exception: ' . $short_message . ' ', 'dark');
+                    if ($option_verbose) {
+                        $lines = [
+                            $e->getMessage(),
+                            $this->shorten($e->getFile()) . ' line[' . $e->getLine() . ']'
+                        ];
+
+                        if ($option_verbose > 1) {
+                            foreach ($e->getTrace() as $t) {
+                                if (isset($t['file'])) {
+                                    $lines[] = $this->shorten($t['file']) . ' line[' . $t['line'] .']';
+                                }
+                            }
+                        }
+
+                        $this->error($lines);
+                    } else {
+                        $short_message = explode(',', $e->getMessage())[0];
+                        $c->writeln(' Exception: ' . $short_message . ' ', 'dark');
+                    }
                 } else {
                     $c->writeln('');
                 }
@@ -149,18 +199,7 @@ class Test
                     $l[1] .= $this->_limitVar($result);
                     $l[1] .= " -> line: $line";
 
-                    $max = 0;
-                    foreach ($l as $v) {
-                        $max = max($max, strlen($v));
-                    }
-
-                    foreach ($l as $k => $v) {
-                        $pad = str_repeat(' ', $max - strlen($v));
-                        $c->write('       ');
-                        $c->write(' ', 'bg_red');
-                        $c->writeln(' ' . $v . $pad . ' ', ['bg_yellow', 'black']);
-                    }
-                    $c->writeln('');
+                    $this->error($l);
                 }
             }
 
@@ -226,7 +265,7 @@ class Test
     function assertEquals($exp, $var)
     {
         return $this->assert($exp, '==', $var, 'equal to ' . $this->_limitVar($exp));
-    }    
+    }
 
     function assertNotEquals($exp, $var)
     {
@@ -242,7 +281,7 @@ class Test
     {
         return $this->assert($exp, '!==', $res, 'not same as ' . $this->_limitVar($exp));
     }
-    
+
     function assertArray($var)
     {
         return $this->assertInternalType('array', $var);
@@ -272,7 +311,7 @@ class Test
     function assertFalse($var)
     {
         return $this->assert(false, '===', $var);
-    }    
+    }
 
     function assertTrue($var)
     {
@@ -287,7 +326,7 @@ class Test
     function assertNotNull($var)
     {
         return $this->assertNotInternalType('null', $var);
-    }    
+    }
 
     function assertString($var)
     {
@@ -399,7 +438,7 @@ class Test
     function assertNotScalar($var)
     {
         return $this->assertNotInternalType('scalar', $var);
-    }    
+    }
 
     function assertZero($var)
     {
@@ -408,7 +447,7 @@ class Test
         } else {
             return $this->assert(0, '===', $var, 'zero');
         }
-    }    
+    }
 
     function assertNotZero($var)
     {
@@ -417,7 +456,7 @@ class Test
         } else {
             return $this->assert(0, '!==', $var, 'not zero');
         }
-    }    
+    }
 
     function assertCallable($var)
     {
@@ -507,13 +546,13 @@ class Test
         try {
             if (is_callable($f))
                 $f();
-            
+
             $e = $f;
         } catch (Exception $e) {
         }
 
         $this->assertInstanceOf($class, $e);
-        
+
         if ($message !== null) {
             $this->assertEquals($message, $e->getMessage());
         }

@@ -10,9 +10,9 @@
         }
     ],
     "require": {
-        "irfantoor/debug": "^0.3.0",
-        "irfantoor/console": "^0.4.0",
-        "irfantoor/command": "^0.2.0"
+        "irfantoor/debug": "dev-master",
+        "irfantoor/console": "dev-master",
+        "irfantoor/command": "dev-master"
     },
     "autoload": {
         "psr-4": {

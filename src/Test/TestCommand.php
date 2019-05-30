@@ -5,7 +5,7 @@ namespace IrfanTOOR\Test;
 use ArgumentCountError;
 use Exception;
 use IrfanTOOR\Command;
-use IrfanTOOR\Test\Constants;
+use IrfanTOOR\Test;
 
 class TestCommand extends Command
 {
@@ -17,10 +17,10 @@ class TestCommand extends Command
         $this->root = $path;
 
         parent::__construct(
-            Constants::NAME,
-            Constants::DESCRIPTION,
+            Test::NAME,
+            Test::DESCRIPTION,
             null,
-            Constants::VERSION,
+            Test::VERSION,
             true
         );
 

@@ -4,9 +4,14 @@ namespace IrfanTOOR;
 
 use Exception;
 use IrfanTOOR\Console;
+use IrfanTOOR\Debug;
 
 class Test
 {
+    const NAME        = "test";
+    const DESCRIPTION = "and I Test ...";
+    const VERSION     = "0.5.1"; # @@VERSION
+
     # types which can be tested with is_ prefix.
     protected static $types = [
 
@@ -43,11 +48,13 @@ class Test
     {
         ob_start();
         var_dump($var);
+
         $result = ob_get_clean();
         $lines = explode("\n", $result);
         $line = $lines[0];
-        if (count($lines) > 2)
+        if (count($lines) > 2) {
             $line .= ' ...';
+        }
 
         return $line;
     }
@@ -71,8 +78,12 @@ class Test
         $c = $this->console;
 
         $max = 0;
+        $l = 2;
         foreach ($lines as $v) {
             $max = max($max, strlen($v));
+            $l--;
+            if ($l === 0)
+                break;
         }
 
         $c->writeln('');
@@ -198,6 +209,27 @@ class Test
                     $l[1] = 'returned: ';
                     $l[1] .= $this->_limitVar($result);
                     $l[1] .= " -> line: $line";
+
+                    if ($this->options['vverbose']['value'] > 1) {
+                        if (is_string($expected) && is_string($result))
+                        {
+                            $e = explode("\n", $expected);
+                            $r = explode("\n", $result);
+
+                            $d1 = array_diff($e, $r);
+                            $d2 = array_diff($r, $e);
+
+                            foreach ($d1 as $k => $d) {
+                                $l[] = "1: " . $d;
+                                $l[] = '--------------------------------------------------';
+                                $l[] = "2: " . $d2[$k];
+                            }
+                        } else {
+                            $l[] = "1: " . print_r($expected, 1);
+                            $l[] = '--------------------------------------------------';
+                            $l[] = "2: " . print_r($result, 1);
+                        }
+                    }
 
                     $this->error($l);
                 }

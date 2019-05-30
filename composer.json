@@ -11,8 +11,8 @@
     ],
     "require": {
         "irfantoor/console": "^0.5.2",
-        "irfantoor/debug": "^0.3.5",
-        "irfantoor/command": "^0.2.3"
+        "irfantoor/debug": "^0.4.2",
+        "irfantoor/command": "^0.3.1"
     },
     "autoload": {
         "psr-4": {

@@ -3,14 +3,16 @@
 namespace IrfanTOOR;
 
 use Exception;
-use IrfanTOOR\Console;
-use IrfanTOOR\Debug;
+use IrfanTOOR\{
+    Console,
+    Debug
+};
 
 class Test
 {
     const NAME        = "test";
     const DESCRIPTION = "and I Test ...";
-    const VERSION     = "0.5.1"; # @@VERSION
+    const VERSION     = "0.6"; # @@VERSION
 
     # types which can be tested with is_ prefix.
     protected static $types = [
@@ -89,7 +91,7 @@ class Test
         $c->writeln('');
         $i = 0;
         foreach ($lines as $k => $v) {
-            $pad = str_repeat(' ', $max - strlen($v));
+            $pad = str_repeat(' ', max(0, $max - strlen($v)));
             if ($i<=1) {
                 $c->write('       ');
                 $c->write(' ', 'bg_red');

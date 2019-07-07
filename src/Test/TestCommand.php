@@ -2,10 +2,11 @@
 
 namespace IrfanTOOR\Test;
 
-use ArgumentCountError;
 use Exception;
-use IrfanTOOR\Command;
-use IrfanTOOR\Test;
+use IrfanTOOR\{
+    Command,
+    Test
+};
 
 class TestCommand extends Command
 {
@@ -16,13 +17,11 @@ class TestCommand extends Command
     {
         $this->root = $path;
 
-        parent::__construct(
-            Test::NAME,
-            Test::DESCRIPTION,
-            null,
-            Test::VERSION,
-            true
-        );
+        parent::__construct([
+            'name' => Test::NAME,
+            'description' => Test::DESCRIPTION,
+            'version' => Test::VERSION,
+        ]);
 
         register_shutdown_function([$this, 'shutdown']);
 

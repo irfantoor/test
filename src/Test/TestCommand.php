@@ -29,7 +29,7 @@ class TestCommand extends Command
         $this->addOption('t', 'testdox', 'Do not print the result of individual tests');
         $this->addOption('q', 'quite',   'Only prints the final result');
 
-        $this->addOperand(
+        $this->addArgument(
             'filter', 
             'Folder or file containing test files',
             self::ARGUMENT_OPTIONAL,
@@ -54,7 +54,7 @@ class TestCommand extends Command
         $quite   = $this->getOption('quite');
         $failed  = $this->getOption('failed');
         $testdox = $this->getOption('testdox');
-        $filter  = $this->getOperand('filter');
+        $filter  = $this->getArgument('filter');
 
         $c = $this->console;
 

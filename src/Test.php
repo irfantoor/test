@@ -12,7 +12,7 @@ class Test
 {
     const NAME        = "test";
     const DESCRIPTION = "and I Test ...";
-    const VERSION     = "0.6"; # @@VERSION
+    const VERSION     = "0.6.1"; # @@VERSION
 
     # types which can be tested with is_ prefix.
     protected static $types = [

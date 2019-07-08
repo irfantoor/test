@@ -10,7 +10,7 @@ class TestCommandTest extends Test
     {
         $cmd = new TestCommand([]);
 
-        $this->assertInstanceOf(IrfanTOOR\Test\TestCommand::class, $cmd);
-        $this->assertInstanceOf(IrfanTOOR\Command::class, $cmd);
+        $this->assertInstanceOf(TestCommand::class, $cmd);
+        $this->assertInstanceOf(Command::class, $cmd);
     }
 }

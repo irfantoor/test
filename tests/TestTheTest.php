@@ -194,7 +194,7 @@ class TestTheTest extends Test
 
         $a = null;
         $this->assertNull($a);
-        $this->assertNull($b); # undefined variable
+        $this->assertNull();   # nothing passed
     }
 
     function testAssertNotNull()
@@ -424,8 +424,8 @@ class TestTheTest extends Test
         $this->assertZero(0.0);
         $this->assertZero(10 - 10);
         $this->assertZero('12' - '12');
-        $this->assertZero('' - '');
-        $this->assertZero(0 + '');
+        $this->assertZero(1 - '1');
+        $this->assertZero('-1' + 1);
         $this->assertZero(0 + 0);
         $a = 0;
         $this->assertZero($a);
@@ -521,8 +521,9 @@ class TestTheTest extends Test
 
     function testAssertScalar()
     {
+        $a = ['HELLO', 'WORLD'];
         $this->assertScalar(self::HELLO);
-        $this->assertScalar(WORLD);
+        $this->assertScalar($a[1]);
         $this->assertScalar(0);
         $this->assertScalar(1.0);
         $this->assertScalar('');
@@ -555,7 +556,8 @@ class TestTheTest extends Test
 
     function testAssertNotDir()
     {
-        $this->assertNotDir([]);
+        $d = [__DIR__, '--'];
+        $this->assertNotDir($d[0] . $d[1]);
         $this->assertNotDir(2);
         $this->assertNotdir(true);
         $this->assertNotdir(false);
@@ -678,7 +680,7 @@ class TestTheTest extends Test
 
     function testAssertUploadedFile()
     {
-        # $this->assertUploadedFile( ... );
+        // throw new Exception("todo - testAssertUploadedFile", 1);
     }
 
     function testAssertNotUploadedFile()

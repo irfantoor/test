@@ -85,6 +85,7 @@ class MyClassTest extends Test
 
         # callable, objects, resources
         $this->assertCallable(function(){});
+        $this->assertCallable([$this, 'setup']);
         $this->assertNotCallable([$this, 'hello']);
         $this->assertObject($class);
         $this->assertNotObject([]);
@@ -133,6 +134,11 @@ class MyClassTest extends Test
         $this->assertNotWriteable('unknown');
 
         unlink('link');
+
+        $this->assertEquals(['hello'], []);
+        $this->assertEquals(
+            'Too few arguments to function IrfanTOOR\Test::assertEquals()',
+            'Too few arguments to function IrfanTOOR\Test::assertEquals() -');
     }
 
     function testSkip()

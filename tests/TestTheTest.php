@@ -1,37 +1,11 @@
 <?php
 
 use IrfanTOOR\Test;
+use IrfanTOOR\Test\TestCommand;
 
-interface SomeInterface {
-    function f();
-    function g();
-}
-
-class SomeClass implements SomeInterface
-{
-    function f()
-    {
-        return "f";
-    }
-
-    function g()
-    {
-        return "g";
-    }
-}
-
-class ExtendedClass extends SomeClass
-{
-    function fg()
-    {
-        return $this->f() . $this->g();
-    }
-
-    function gf()
-    {
-        throw new Exception("Error Processing GF", 1);
-    }
-}
+use Tests\SomeInterface;
+use Tests\SomeClass;
+use Tests\ExtendedClass;
 
 class TestTheTest extends Test
 {
@@ -39,11 +13,47 @@ class TestTheTest extends Test
 
     protected $t = null;
     protected $c = 0;
+    protected $throwables;
 
-    function __construct($options = [])
+    protected $method_skipped = 0;
+
+    function __construct()
     {
-        parent::__construct($options);
-        $this->t = new Test;
+        parent::__construct();
+        $this->t = new StdClass();
+
+        $this->throwables = [
+            'exception'       => new Exception,
+            'error'           => new Error,
+            'throw_exception' => function () { throw new Exception(""); },
+            'throw_error'     => function () { throw new Error("");     },
+        ];
+
+        $this->not_throwables = [
+            null,
+            0,
+            1,
+            1.1,
+            "",
+            [],
+            self::HELLO,
+            $this->t,
+        ];
+
+        $this->thrown = [
+            function () { throw new Exception(""); },
+            function () { throw new Error("");     },
+            function () { return new Hello;        },
+
+            # todo -- error is not caught!
+            // function () { include "unknown file";  },
+        ];
+
+        $this->not_thrown = [
+            function() { return new Exception(""); },
+            function() { return new Error("");     },
+            function() { return new StdClass();    },
+        ];
     }
 
     function setup()
@@ -53,14 +63,29 @@ class TestTheTest extends Test
 
     function testConstruct()
     {
-        $this->assertObject(new Test);
-        $this->assertInstanceOf(IrfanTOOR\Test::class, $this->t);
+        # setup was called in the beginning
+        $this->assertEquals(1, $this->c);
+
+        $this->assertObject($this);
+        $this->assertInstanceOf(Test::class, $this);
+
+        # construct is called
+        $this->assertInstanceOf(StdClass::class, $this->t);
+
+        # construct is only called once
         $this->t = null;
     }
 
     function testSetup()
     {
+        # construct is only called once
         $this->assertNull($this->t);
+
+        # setup was called in the beginning
+        $this->assertEquals(2, $this->c);
+
+        # setup is only called once
+        $this->assertEquals(2, $this->c);
         $this->assertEquals(2, $this->c);
     }
 
@@ -72,7 +97,6 @@ class TestTheTest extends Test
         $a = 6;
         $b = 6;
         $this->assertEquals($a, $b);
-        $this->assertEquals('1234', 1234);
 
         $c = new SomeClass;
         $d = new SomeClass;
@@ -82,6 +106,13 @@ class TestTheTest extends Test
         $this->assertEquals("f", $e->f());
         $this->assertEquals("g", $e->g());
         $this->assertEquals("fg", $e->fg());
+
+        # might seem confusing ...
+        $this->assertEquals('1234', 1234);
+        $this->assertEquals(null, 0);
+        $this->assertEquals(null, "");
+        $this->assertEquals(null, []);
+        $this->assertEquals(0, "");
     }
 
     function testAssertNotEquals()
@@ -89,8 +120,16 @@ class TestTheTest extends Test
         $a = 6;
         $b = 6;
         $b++;
+
         $this->assertNotEquals($a, $b);
         $this->assertNotEquals('12345', 1234);
+        $this->assertNotEquals(0, 1);
+        $this->assertNotEquals(1, [1]);
+        $this->assertNotEquals([null], []);
+
+        # not associative ;-)
+        $this->assertNotEquals(0, []);
+        $this->assertNotEquals("", []);
     }
 
     function testAssertSame()
@@ -102,6 +141,10 @@ class TestTheTest extends Test
         $c = new SomeClass;
         $d = $c;
         $this->assertSame($c, $d);
+
+        $e = &$c;
+        $f = &$d;
+        $this->assertSame($e, $f);
     }
 
     function testAssertNotSame()
@@ -112,7 +155,12 @@ class TestTheTest extends Test
 
         $c = new SomeClass;
         $d = new SomeClass;
+
+        $this->assertEquals($c, $d);
         $this->assertNotSame($c, $d);
+
+        $this->assertEquals(null, '');
+        $this->assertNotSame(null, '');
     }
 
     function testAssertArray()
@@ -123,29 +171,32 @@ class TestTheTest extends Test
         $this->assertArray([0, null]);
         $this->assertArray(explode(',', 'a,b,c'));
         $this->assertArray($_SERVER);
+        $this->assertArray([$this, 'testAssertArray']);
     }
 
     function testAssertNotArray()
     {
-        $this->assertNotarray(true);
-        $this->assertNotarray(false);
-        $this->assertNotarray(!false);
-        $this->assertNotarray(!true);
+        $this->assertNotArray(true);
+        $this->assertNotArray(false);
+        $this->assertNotArray(!false);
+        $this->assertNotArray(!true);
         $this->assertNotArray(null);
         $this->assertNotArray(0);
         $this->assertNotArray(1.1);
         $this->assertNotArray('hello');
-        $this->assertNotArray(new Exception);    
+        $this->assertNotArray($this);
+        $this->assertNotArray(new Exception);
     }
 
     function testAssertArrayHasKey()
     {
-        $this->assertArrayHasKey('0', ['zero']);
-        $this->assertArrayHasKey('0', [1]);
-        $this->assertArrayHasKey('10', [9=>'a', 'b']);
-        $this->assertArrayHasKey('a', ['zero', 'a' => 'apple']);
-        $this->assertArrayHasKey('argv', $_SERVER);
-    }  
+        $this->assertArrayHasKey(['zero'], '0');
+        $this->assertArrayHasKey(['zero'], '0');
+        $this->assertArrayHasKey([1], '0');
+        $this->assertArrayHasKey([9=>'a', 'b'], '10');
+        $this->assertArrayHasKey(['zero', 'a' => 'apple'], 'a');
+        $this->assertArrayHasKey($_SERVER, 'argv');
+    }
 
     function testAssertBool()
     {
@@ -159,6 +210,8 @@ class TestTheTest extends Test
     {
         $this->assertNotBool(null);
         $this->assertNotBool(0);
+        $this->assertNotBool(1);
+        $this->assertNotBool(-1);
         $this->assertNotBool(1.1);
         $this->assertNotBool('hello');
         $this->assertNotBool([]);
@@ -189,12 +242,10 @@ class TestTheTest extends Test
 
     function testAssertNull()
     {
-        $this->assertNull(null);
         $this->assertNull(NULL);
 
         $a = null;
         $this->assertNull($a);
-        $this->assertNull();   # nothing passed
     }
 
     function testAssertNotNull()
@@ -439,7 +490,7 @@ class TestTheTest extends Test
         $this->assertNotZero('0');
         $this->assertNotZero('');
         $this->assertNotZero([]);
-        
+
         $a = 1/1e100;
         $this->assertNotZero($a);
     }
@@ -462,15 +513,15 @@ class TestTheTest extends Test
         $this->assertNotCallable(2);
         $this->assertNotCallable([$this, null]);
         $this->assertNotCallable('hello');
-        $this->assertNotcallable(true);
-        $this->assertNotcallable(false);
-        $this->assertNotcallable(!false);
-        $this->assertNotcallable(!true);
-        $this->assertNotcallable(null);
-        $this->assertNotcallable(0);
-        $this->assertNotcallable(1.1);
-        $this->assertNotcallable('hello');
-        $this->assertNotcallable(new Exception);          
+        $this->assertNotCallable(true);
+        $this->assertNotCallable(false);
+        $this->assertNotCallable(!false);
+        $this->assertNotCallable(!true);
+        $this->assertNotCallable(null);
+        $this->assertNotCallable(0);
+        $this->assertNotCallable(1.1);
+        $this->assertNotCallable('hello');
+        $this->assertNotCallable(new Exception);
     }
 
     function testAssertObject()
@@ -491,6 +542,22 @@ class TestTheTest extends Test
         $this->assertNotObject(true);
         $this->assertNotObject(false);
         $this->assertNotObject([]);
+    }
+
+    function testAssertMethod()
+    {
+        $object = new ExtendedClass();
+
+        $this->assertMethod($object, 'fg');
+        $this->assertMethod($object, 'gf');
+    }
+
+    function testAssertNotMethod()
+    {
+        $object = new ExtendedClass();
+
+        $this->assertNotMethod($object, 'gh');
+        $this->assertNotMethod($object, 'hg');
     }
 
     function testAssertResource()
@@ -559,15 +626,15 @@ class TestTheTest extends Test
         $d = [__DIR__, '--'];
         $this->assertNotDir($d[0] . $d[1]);
         $this->assertNotDir(2);
-        $this->assertNotdir(true);
-        $this->assertNotdir(false);
-        $this->assertNotdir(!false);
-        $this->assertNotdir(!true);
-        $this->assertNotdir(null);
-        $this->assertNotdir(0);
-        $this->assertNotdir(1.1);
-        $this->assertNotdir('hello');
-        $this->assertNotdir(new Exception);          
+        $this->assertNotDir(true);
+        $this->assertNotDir(false);
+        $this->assertNotDir(!false);
+        $this->assertNotDir(!true);
+        $this->assertNotDir(null);
+        $this->assertNotDir(0);
+        $this->assertNotDir(1.1);
+        $this->assertNotDir('hello');
+        $this->assertNotDir(new Exception);
     }
 
     function testAssertExecutable()
@@ -610,7 +677,7 @@ class TestTheTest extends Test
     {
         symlink(__FILE__, 'link');
         file_put_contents('file', '');
-        
+
         $this->assertReadable(__FILE__);
         $this->assertReadable(__DIR__);
         $this->assertReadable('link');
@@ -624,7 +691,7 @@ class TestTheTest extends Test
     {
         file_put_contents('file', '');
         chmod('file', 0x000);
-        
+
         $this->assertNotReadable('/unknowndir');
         $this->assertNotReadable('unknownfile');
         $this->assertNotReadable('file');
@@ -699,49 +766,193 @@ class TestTheTest extends Test
         $d = new ExtendedClass;
         $this->assertInstanceOf(ExtendedClass::class, $d);
         $this->assertInstanceOf(SomeClass::class, $d);
+
+        # even the interface
+        $this->assertImplements(SomeInterface::class, $d);
     }
 
     function testAssertImplements()
     {
+        # implements
         $c = new ExtendedClass;
         $this->assertImplements(SomeInterface::class, $c);
+
+        $this->assertNotImplements(SomeInterface::class, $this);
+
+        # these are the extentions and not implementations en stricto sensu
+        $this->assertNotImplements(SomeClass::class, $c);
+        $this->assertNotImplements(Test::class, $this);
     }
 
-    function testException()
+    function testAssertThrowable()
     {
-        $c = $this->count;
+        foreach ($this->throwables as $t) {
+            $this->assertThrowable($t);
+        }
 
-        $f = function(){
-            throw new Exception("Error Processing Request", 1);
-        };
+        $this->assertThrowable(new Error());
+        $this->assertThrowable(new Exception());
 
-        $this->assertException($f);
-        $this->assertException(new Exception);
-        $this->assertException(
-            function(){
-                $e = new ExtendedClass;
-                $e->gf();
-            },
-            Exception::class,
-            'Error Processing GF'
-        );
-
-        $this->assertEquals(4, $this->count - $c);
+        foreach ($this->not_throwables as $nt) {
+            $this->assertNotThrowable($nt);
+        }
     }
 
-    function testExceptionMessage()
+    function testAssertException()
     {
-        $c = $this->count;
+        $this->assertException($this->throwables['exception']);
+        $this->assertException($this->throwables['throw_exception']);
+        $this->assertNotException($this->throwables['error']);
+        $this->assertNotException($this->throwables['throw_error']);
+        $this->assertException(new Exception());
+        $this->assertNotException(new Error());
 
-        $f = function(){
-            throw new Exception("Error Processing Request", 1);
-        };
-        $this->assertExceptionMessage("Error Processing Request", $f);
-        $this->assertExceptionMessage("Error Processing GF", function(){
-            $e = new ExtendedClass;
-            $e->gf();
-        });
-
-        $this->assertEquals(2, $this->count - $c);
+        foreach ($this->not_throwables as $nt) {
+            $this->assertNotException($nt);
+        }
     }
+
+    function testAssertError()
+    {
+        $this->assertError($this->throwables['error']);
+        $this->assertError($this->throwables['throw_error']);
+        $this->assertError(new Error());
+
+        $this->assertNotError($this->throwables['exception']);
+        $this->assertNotError($this->throwables['throw_exception']);
+        $this->assertNotError(new Exception());
+
+        foreach ($this->not_throwables as $nt) {
+            $this->assertNotError($nt);
+        }
+    }
+
+    function testAssertThrown()
+    {
+        foreach ($this->thrown as $th) {
+            $this->assertThrown($th);
+        }
+
+        $this->assertNotThrown(new Error());
+        $this->assertNotThrown(new Exception());
+
+        foreach ($this->not_thrown as $nth) {
+            $this->assertNotThrown($nth);
+        }
+    }
+
+    function testAssertThrownException()
+    {
+        $this->assertThrownException($this->throwables['throw_exception']);
+        $this->assertThrownException(function () { throw new Exception(""); });
+
+        $this->assertNotThrownException(function () { throw new Error(""); });
+        $this->assertNotThrownException(new Error());
+        $this->assertNotThrownException(new Exception());
+
+        foreach ($this->not_thrown as $nth) {
+            $this->assertNotThrownException($nth);
+        }
+    }
+
+    function testAssertThrownError()
+    {
+        $this->assertThrownError($this->throwables['throw_error']);
+        $this->assertThrownError(function () { throw new Error(""); });
+
+        $this->assertNotThrownError(function () { throw new Exception(""); });
+        $this->assertNotThrownError(new Error());
+        $this->assertNotThrownError(new Exception());
+
+        foreach ($this->not_thrown as $nth) {
+            $this->assertNotThrownError($nth);
+        }
+    }
+
+    function testProcessAssertion()
+    {
+        // const ASSERTION_PASSED        =  1; # assertion passed
+        $result  = $this->processAssertion('assertEquals', [1, 1]);
+        $this->assertEquals(self::ASSERTION_PASSED, $result['status']);
+        
+        // const ASSERTION_FAILED        =  0; # assertion failed
+        $result  = $this->processAssertion('assertEquals', [1, 0]);
+        $this->assertEquals(self::ASSERTION_FAILED, $result['status']);
+
+        // const ASSERTION_EXCEPTION     = -1; # assertion threw an exception
+        $result  = $this->processAssertion('assertRaiseException', [
+            function () {
+                throw new Exception("ASSERTION_EXCEPTION");
+            }
+        ]);
+        $this->assertEquals(self::ASSERTION_EXCEPTION, $result['status']);
+        $this->assertEquals("ASSERTION_EXCEPTION", $result['message']);
+        
+
+        // const ARGUMENTS_COUNT_ERROR   = -2; # assertion called with bad count of arguments
+        $result  = $this->processAssertion('assertEquals', [1]);
+        $this->assertEquals(self::ARGUMENTS_COUNT_ERROR, $result['status']);
+
+        // const ASSERTION_UNKNOWN       = -3; # assertion is not defined in the list of assertions
+        $result  = $this->processAssertion('assertCallback', [function() {}]);
+        $this->assertEquals(self::ASSERTION_UNKNOWN, $result['status']);
+
+        // const ASSERTION_MISMATCH      = -4; # not even an assertion e.g. $this->asserEquals(1,1);
+        $result  = $this->processAssertion('asserEquals', [1, 1]);
+        $this->assertEquals(self::ASSERTION_MISMATCH, $result['status']);
+    }
+
+    /**
+     * throws: Exception::class
+     */
+    public function testExceptionThrown()
+    {
+        throw new Exception("method throws an exception, it must not be skipped");
+    }
+
+    /**
+     * throws: Exception::class
+     * message: method throws an exception, it must not be skipped
+     */
+    public function testExceptionThrownWithMessage()
+    {
+        throw new Exception("method throws an exception, it must not be skipped");
+    }
+
+    /**
+     * Single parameter
+     * a: $this->getArgs()
+     */
+    public function testSource($a)
+    {
+        $this->assertNotNull($a);
+    }
+
+    /**
+     * throws: Exception::class
+     * a: $this->getArgs()
+     */
+    public function testExceptionWithSource($a)
+    {
+        throw new Exception($a);
+    }
+
+    /**
+     * throws: Exception::class
+     * message: {$a}
+     * a: $this->getArgs()
+     */
+    public function testExceptionWithSourceAndMessage($a)
+    {
+        throw new Exception($a);
+    }
+
+    function getArgs()
+    {
+        return [
+            'a',
+            'b',
+            'c',
+        ];
+    }    
 }

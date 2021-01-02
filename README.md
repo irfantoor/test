@@ -1,6 +1,6 @@
 # IrfanTOOR\Test
 
-and I Test ...
+Bring back colours to your unit tests
 
 Require it using composer:
 ```sh
@@ -9,8 +9,12 @@ $ composer require --dev irfantoor/test
 
 ## Usage with an example
 
-file: examples/TestMyClass.php
-[note: name must match with the test class name]
+An example php file, is included here to serve as a fast example of how you can use the
+unit tests.
+
+Filename: examples/TestMyClass.php
+Note: filename must match with the test class name, i.e. the filename implies that the test class
+defined int the file is: TestMyClass
 
 ```php
 <?php
@@ -35,7 +39,7 @@ class SomeClass implements SomeInterface
     }
 }
 
-class TestMyClass extends Test
+class MyClassTest extends Test
 {
     function setup()
     {
@@ -61,7 +65,7 @@ class TestMyClass extends Test
         # array
         $this->assertArray([]);
         $this->assertNotArray("I'm not an array");
-        $this->assertArrayHasKey('a', ['zero', 'a' => 'apple']);
+        $this->assertArrayHasKey(['zero', 'a' => 'apple'], 'a');
 
         # bool
         $this->assertBool(false);
@@ -100,7 +104,8 @@ class TestMyClass extends Test
 
         # callable, objects, resources
         $this->assertCallable(function(){});
-        $this->assertNotCallable([$this, 'hello']);
+        $this->assertCallable([$this, 'setup']);
+        $this->assertNotCallable([$this, 'functionNotDefined']);
         $this->assertObject($class);
         $this->assertNotObject([]);
         $this->assertResource(STDIN);
@@ -112,19 +117,19 @@ class TestMyClass extends Test
 
         # Assert Exception only
         $this->assertException(
-            function(){
+            function () {
                 throw new Exception("Exception Message", 1);
             }
         );
 
-        # Assert Exception Message Only
-        $this->assertExceptionMessage("Error Message", function(){
+        # test will fail here, function is not defined any more ...
+        $this->assertExceptionMessage("Error Message", function() {
             throw new Exception("Error Message", 1);
         });
 
         # Assert Exception and the Message
         $this->assertException(
-            function(){
+            function () {
                 throw new Exception("Exception Message", 1);
             },
             Exception::class,
@@ -148,28 +153,109 @@ class TestMyClass extends Test
         $this->assertNotWriteable('unknown');
 
         unlink('link');
+
+        $this->assertEquals(['hello'], []);
+        $this->assertEquals(
+            'Too few arguments to function IrfanTOOR\Test::assertEquals()',
+            'Too few arguments to function IrfanTOOR\Test::assertEquals() -');
     }
 
     function testSkip()
     {
         $this->assertEquals('1');
     }
-}
 
+    public function testMethodSkip()
+    {
+        throw new Exception("method throws an exception, it must be skipped");
+    }
+
+    /**
+     * throws: Exception::class
+     */
+    public function testExceptionThrown()
+    {
+        throw new Exception("method throws an exception, it must be skipped");
+    }
+
+    /**
+     * throws: Exception::class
+     * message: method throws an exception, it must be skipped
+     */
+    public function testExceptionThrownWithMessage()
+    {
+        throw new Exception("method throws an exception, it must be skipped");
+    }
+
+    /**
+     * Single parameter
+     * a: $this->getArgs()
+     */
+    public function testSource($a)
+    {
+        $this->assertNotNull($a);
+    }
+
+    /**
+     * throws: Exception::class
+     * a: $this->getArgs()
+     */
+    public function testExceptionWithSource($a)
+    {
+        throw new Exception($a);
+    }
+
+    /**
+     * throws: Exception::class
+     * message: {$a}
+     * a: $this->getArgs()
+     */
+    public function testExceptionWithSourceAndMessage($a)
+    {
+        throw new Exception($a);
+    }
+
+    function getArgs()
+    {
+        return [
+            'a',
+            'b',
+            'c',
+        ];
+    }
+}
 ```
 
 ```sh
-                     
-  test 0.3.6         
-  and I Test ... 
-                     
+$ ./test examples/MyClassTest.php 
+test 1.0 alfa
+and I test ....
 
-examples/MyClassTest.php
-  [59] testExamples .................................F........................  [1]
-         expected: not zero             
-         returned: float(0) -> line: 84 
+MyClassTest.php 
+ [ 56] Examples .................................F..F.......SS..............FF
+ [  0] Skip S
+ [  0] MethodSkip M
+ [  1] ExceptionThrown .
+ [  2] ExceptionThrownWithMessage ..
+ [  3] Source ...
+ [  3] ExceptionWithSource ...
+ [  6] ExceptionWithSourceAndMessage ......
+   71 passed  4 failed  3 skipped   1 method skipped 
+```
 
-  [  ] testSkip (skipped) line: 140 >>  Exception: Too few arguments to function IrfanTOOR\Test::assertEquals() 
+You can try running the test, by increasing the verbosity level, which will add some additional
+information in a colorful way.
 
-   59 passed     1 failed 
+```sh
+# with no verbosity level
+$ ./test examples/TestMyClass.php
+
+# with verbosity level 1
+$ ./test -v examples/TestMyClass.php
+
+# with verbosity level 2
+$ ./test -vv examples/TestMyClass.php
+
+# with verbosity level 3
+$ ./test -vvv examples/TestMyClass.php
 ```

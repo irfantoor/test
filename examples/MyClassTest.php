@@ -46,7 +46,7 @@ class MyClassTest extends Test
         # array
         $this->assertArray([]);
         $this->assertNotArray("I'm not an array");
-        $this->assertArrayHasKey('a', ['zero', 'a' => 'apple']);
+        $this->assertArrayHasKey(['zero', 'a' => 'apple'], 'a');
 
         # bool
         $this->assertBool(false);
@@ -86,7 +86,7 @@ class MyClassTest extends Test
         # callable, objects, resources
         $this->assertCallable(function(){});
         $this->assertCallable([$this, 'setup']);
-        $this->assertNotCallable([$this, 'hello']);
+        $this->assertNotCallable([$this, 'functionNotDefined']);
         $this->assertObject($class);
         $this->assertNotObject([]);
         $this->assertResource(STDIN);
@@ -98,19 +98,19 @@ class MyClassTest extends Test
 
         # Assert Exception only
         $this->assertException(
-            function(){
+            function () {
                 throw new Exception("Exception Message", 1);
             }
         );
 
-        # Assert Exception Message Only
-        $this->assertExceptionMessage("Error Message", function(){
+        # test will fail here, function is not defined any more ...
+        $this->assertExceptionMessage("Error Message", function() {
             throw new Exception("Error Message", 1);
         });
 
         # Assert Exception and the Message
         $this->assertException(
-            function(){
+            function () {
                 throw new Exception("Exception Message", 1);
             },
             Exception::class,
@@ -144,5 +144,64 @@ class MyClassTest extends Test
     function testSkip()
     {
         $this->assertEquals('1');
+    }
+
+    public function testMethodSkip()
+    {
+        throw new Exception("method throws an exception, it must be skipped");
+    }
+
+    /**
+     * throws: Exception::class
+     */
+    public function testExceptionThrown()
+    {
+        throw new Exception("method throws an exception, it must be skipped");
+    }
+
+    /**
+     * throws: Exception::class
+     * message: method throws an exception, it must be skipped
+     */
+    public function testExceptionThrownWithMessage()
+    {
+        throw new Exception("method throws an exception, it must be skipped");
+    }
+
+    /**
+     * Single parameter
+     * a: $this->getArgs()
+     */
+    public function testSource($a)
+    {
+        $this->assertNotNull($a);
+    }
+
+    /**
+     * throws: Exception::class
+     * a: $this->getArgs()
+     */
+    public function testExceptionWithSource($a)
+    {
+        throw new Exception($a);
+    }
+
+    /**
+     * throws: Exception::class
+     * message: {$a}
+     * a: $this->getArgs()
+     */
+    public function testExceptionWithSourceAndMessage($a)
+    {
+        throw new Exception($a);
+    }
+
+    function getArgs()
+    {
+        return [
+            'a',
+            'b',
+            'c',
+        ];
     }
 }

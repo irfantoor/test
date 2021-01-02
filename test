@@ -1,8 +1,6 @@
 #!/usr/bin/env php
 <?php
 
-define('ROOT', $_SERVER['PWD'] . '/');
-
 foreach (
     [
         __DIR__ . '/',
@@ -25,5 +23,5 @@ require AUTOLOAD;
 
 use IrfanTOOR\Test\TestCommand;
 
-$cmd = new TestCommand(ROOT);
+$cmd = new TestCommand();
 $cmd->run();

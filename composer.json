@@ -1,7 +1,8 @@
 {
     "name": "irfantoor/test",
-    "description": "and I Test ...",
+    "description": "Bring back colours to your unit tests",
     "type": "library",
+    "keywords": ["php", "colorful", "unit", "test"],
     "license": "MIT",
     "authors": [
         {
@@ -11,13 +12,13 @@
     ],
     "require": {
         "php": ">= 7.3",
-        "irfantoor/debug": "^0.5.0",
-        "irfantoor/command": "^0.4.0"
+        "irfantoor/debug": "~0.6",
+        "irfantoor/command": "~0.5"
     },
     "autoload": {
         "psr-4": {
             "IrfanTOOR\\": "src/",
-            "IrfanTOOR\\Test\\": "src/"
+            "Tests\\": "tests/classes/"
         }
     },
     "bin": [

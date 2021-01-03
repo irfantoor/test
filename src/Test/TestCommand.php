@@ -81,10 +81,14 @@ class TestCommand extends Command
 
     /**
      * TestCommand constructor
+     *
+     * @param string $root Root path
      */
-    public function __construct()
+    public function __construct(string $root)
     {
         parent::__construct();
+
+        $this->root = $root;
 
         $this->setName(self::NAME);
         $this->setDescription(self::DESCRIPTION);
@@ -115,7 +119,6 @@ class TestCommand extends Command
      */
     protected function configure()
     {
-        $this->root         = dirname(dirname(__DIR__)) . "/";
         $this->level        = $this->getOption('verbose');
         // $this->failed_only  = $this->getOption('failed');
         $this->testdox      = $this->getOption('testdox');

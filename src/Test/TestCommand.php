@@ -84,11 +84,14 @@ class TestCommand extends Command
      *
      * @param string $root Root path
      */
-    public function __construct(string $root)
+    public function __construct(?string $root = null)
     {
         parent::__construct();
 
-        $this->root = $root;
+        if (!$root)
+            $root = __DIR__;
+
+        $this->root = rtrim($root, "/") . "/";
 
         $this->setName(self::NAME);
         $this->setDescription(self::DESCRIPTION);

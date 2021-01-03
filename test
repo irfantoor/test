@@ -23,5 +23,5 @@ require AUTOLOAD;
 
 use IrfanTOOR\Test\TestCommand;
 
-$cmd = new TestCommand();
+$cmd = new TestCommand(__DIR__);
 $cmd->run();

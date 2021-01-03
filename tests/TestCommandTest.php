@@ -8,7 +8,7 @@ class TestCommandTest extends Test
 {
     function testInstance()
     {
-        $cmd = new TestCommand([]);
+        $cmd = new TestCommand();
 
         $this->assertInstanceOf(TestCommand::class, $cmd);
         $this->assertInstanceOf(Command::class, $cmd);
@@ -22,7 +22,7 @@ class TestCommandTest extends Test
 
     function testCanSkipAMethodThrowingException()
     {
-        $cmd = new TestCommand([]);
+        $cmd = new TestCommand();
 
         ob_start();
 
@@ -48,7 +48,7 @@ class TestCommandTest extends Test
 
     function testCanSkipAnAbsentFile()
     {
-        $cmd = new TestCommand([]);
+        $cmd = new TestCommand();
 
         $cmd->ob_start();
 
@@ -74,12 +74,12 @@ class TestCommandTest extends Test
 
     function testCanSkipAFileThrowingException()
     {
-        $cmd = new TestCommand([]);
+        $cmd = new TestCommand(__DIR__);
 
         $cmd->ob_start();
 
         try {
-            $cmd->runFileUnitTests(__DIR__ . '/classes/SkipFileTest.php');
+            $cmd->runFileUnitTests('/classes/SkipFileTest.php');
         } catch (Throwable $e) {
         }
         

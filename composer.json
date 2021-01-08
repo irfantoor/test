@@ -12,7 +12,6 @@
     ],
     "require": {
         "php": ">= 7.3",
-        "irfantoor/debug": "~0.6",
         "irfantoor/command": "~0.5"
     },
     "autoload": {

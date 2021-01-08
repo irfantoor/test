@@ -639,7 +639,7 @@ class TestTheTest extends Test
 
     function testAssertExecutable()
     {
-        $this->assertExecutable(dirname(__DIR__) . '/test');
+        $this->assertExecutable(dirname(__DIR__) . '/vendor/bin/test');
     }
 
     function testAssertNotExecutable()

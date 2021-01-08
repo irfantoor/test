@@ -39,7 +39,7 @@ class Test
 {
     const NAME        = "Unit Test";
     const DESCRIPTION = "and I test ....";
-    const VERSION     = "0.7.2";
+    const VERSION     = "0.7.3";
 
     /**
      * Constants describing different assertion statuses

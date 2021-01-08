@@ -791,6 +791,10 @@ class TestCommand extends Command
 
         $this->result = [];
         $this->file_skipped = false;
+
+        if (!$this->quite) {
+            $this->writeln();
+        }
     }
 
     /**

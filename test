@@ -1,0 +1,32 @@
+#!/usr/bin/env php
+<?php
+
+use IrfanTOOR\Test\TestCommand;
+use IrfanTOOR\MiniLoader;
+
+$root = __DIR__ . "/";
+$pos = strrpos(__DIR__, '/vendor/');
+
+if ($pos) {
+    $root = substr($root, 0, $pos + 1);
+}
+
+$files = [
+    'vendor/irfantoor/mini-loader/src/MiniLoader.php',
+    'vendor/autoload.php'
+];
+
+foreach ($files as $file)
+    if (file_exists($root . $file)) {
+        require $root . $file;
+        break;
+    }
+
+try {
+    $cmd = new TestCommand($root);
+} catch (Throwable $e) {
+    new MiniLoader(__DIR__);
+    $cmd = new TestCommand($root);
+}
+
+$cmd->run();

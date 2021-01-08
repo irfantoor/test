@@ -24,7 +24,5 @@
     "bin": [
         "test"
     ],
-    "require-dev": {
-        "irfantoor/mini-loader": "^0.1.1"
-    }
+    "require-dev": {}
 }

@@ -7,6 +7,21 @@ Require it using composer:
 $ composer require --dev irfantoor/test
 ```
 
+# How to use test?
+
+```sh
+$ cd github/yourname/yourproject/
+
+# require it as --dev dependency inside your project
+$ composer require --dev irfantoor/test
+
+# you can use the following syntax in the base folder of your prject:
+$ ./vendor/bin/test
+
+# Note: By default it will try to locate the test classes in the tests folder and will
+# execute all the unit tests.
+```
+
 ## Usage with an example
 
 An example php file, is included here to serve as a fast example of how you can use the

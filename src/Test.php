@@ -39,7 +39,7 @@ class Test
 {
     const NAME        = "Unit Test";
     const DESCRIPTION = "and I test ....";
-    const VERSION     = "0.7.6";
+    const VERSION     = "0.7.7";
 
     /**
      * Constants describing different assertion statuses
@@ -65,12 +65,12 @@ class Test
      * of assertion function and its arguments. Keys help in creating a virtual
      * method, and the values help in creating the expression to evaluate and
      * the arguments required.
-     * 
+     *
      * For example with the definition: 'Equals' => '$expeced == $returned',
      *    key 'Equals' can create two assertions:
      *    1. assertEquals
      *    2. assertNotEquals
-     * 
+     *
      *    value contains two variables, so the final assertions, must be called
      *    with two arguments:
      *    1. $this->assertEquals($expected, $returned);
@@ -143,7 +143,7 @@ class Test
         'UploadedFile' => 'is_uploaded_file($filename)',
         'Writable'     => 'is_writable($filename)',
         'Writeable'    => 'is_writable($filename)',
-        
+
         # ... other expressions can be added here
 
         # exception case - i.e. to catch if a defined expression is not valid
@@ -151,11 +151,11 @@ class Test
     ];
 
     /**
-     * Called once in the beginning by the class extending from Test 
+     * Called once in the beginning by the class extending from Test
      */
     public function __construct() {}
 
-    /** 
+    /**
      * Called before every method of the class extending from test
      */
     public function setup() {}
@@ -196,8 +196,8 @@ class Test
      *
      * @param string $method Assertion method
      * @param array  $args   Arguments of assertion
-     * @return array 
-     */ 
+     * @return array
+     */
     protected function processAssertion($method, $args): array
     {
         # backtrace
@@ -330,5 +330,5 @@ class Test
         } catch (Throwable $e) {
             return is_a($e, $class);
         }
-    } 
+    }
 }

@@ -12,7 +12,8 @@
     ],
     "require": {
         "php": ">= 7.3",
-        "irfantoor/command": "~0.5"
+        "irfantoor/command": "~0.5",
+        "sebastian/object-reflector": "^2.0"
     },
     "autoload": {
         "psr-4": {
@@ -22,6 +23,5 @@
     },
     "bin": [
         "test"
-    ],
-    "require-dev": {}
+    ]
 }

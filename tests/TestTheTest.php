@@ -874,7 +874,7 @@ class TestTheTest extends Test
         // const ASSERTION_PASSED        =  1; # assertion passed
         $result  = $this->processAssertion('assertEquals', [1, 1]);
         $this->assertEquals(self::ASSERTION_PASSED, $result['status']);
-        
+
         // const ASSERTION_FAILED        =  0; # assertion failed
         $result  = $this->processAssertion('assertEquals', [1, 0]);
         $this->assertEquals(self::ASSERTION_FAILED, $result['status']);
@@ -887,7 +887,7 @@ class TestTheTest extends Test
         ]);
         $this->assertEquals(self::ASSERTION_EXCEPTION, $result['status']);
         $this->assertEquals("ASSERTION_EXCEPTION", $result['message']);
-        
+
 
         // const ARGUMENTS_COUNT_ERROR   = -2; # assertion called with bad count of arguments
         $result  = $this->processAssertion('assertEquals', [1]);
@@ -954,5 +954,5 @@ class TestTheTest extends Test
             'b',
             'c',
         ];
-    }    
+    }
 }

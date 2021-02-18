@@ -76,7 +76,7 @@ class MyClassTest extends Test
         # same
         $this->assertSame($some, $class);
         $this->assertNotSame($some, $somemore);
-        
+
         # array
         $this->assertArray([]);
         $this->assertNotArray("I'm not an array");
@@ -242,11 +242,11 @@ class MyClassTest extends Test
 ```
 
 ```sh
-$ ./test examples/MyClassTest.php 
+$ ./test examples/MyClassTest.php
 test 1.0 alfa
 and I test ....
 
-MyClassTest.php 
+MyClassTest.php
  [ 56] Examples .................................F..F.......SS..............FF
  [  0] Skip S
  [  0] MethodSkip M
@@ -255,7 +255,7 @@ MyClassTest.php
  [  3] Source ...
  [  3] ExceptionWithSource ...
  [  6] ExceptionWithSourceAndMessage ......
-   71 passed  4 failed  3 skipped   1 method skipped 
+   71 passed  4 failed  3 skipped   1 method skipped
 ```
 
 You can try running the test, by increasing the verbosity level, which will add some additional
@@ -263,14 +263,21 @@ information in a colorful way.
 
 ```sh
 # with no verbosity level
-$ ./test examples/TestMyClass.php
+$ ./test examples/MyClassTest.php
 
 # with verbosity level 1
-$ ./test -v examples/TestMyClass.php
+$ ./test -v examples/MyClassTest.php
 
 # with verbosity level 2
-$ ./test -vv examples/TestMyClass.php
+$ ./test -vv examples/MyClassTest.php
 
 # with verbosity level 3
-$ ./test -vvv examples/TestMyClass.php
+$ ./test -vvv examples/MyClassTest.php
+
+# i and f options have been added to facilitate the development
+$ ./test -vvv -i ExceptionThrownWithMessage examples/MyClassTest.php
+$ ./test -vvv -f exception examples/MyClassTest.php
+
+NOTE: both i and f take the value, which is case insensitive.
+
 ```

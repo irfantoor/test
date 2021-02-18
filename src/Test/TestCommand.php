@@ -29,7 +29,7 @@ class TestCommand extends Command
      */
     const FILE_EXCEPTION   = -5; # file including the class could not be loaded
     const METHOD_EXCEPTION = -6; # some method in the file throws an exception
-    
+
     /** @var string -- root path */
     protected $root;
 
@@ -38,6 +38,12 @@ class TestCommand extends Command
 
     /** @var int -- debug level from 0 to 4 */
     protected $level;
+
+    /** @var string -- individual test */
+    protected $itest;
+
+    /** @var string -- filter for the methods to be tested */
+    protected $filter;
 
     /** @var bool -- option to process the results for documentation */
     protected $testdox;
@@ -53,7 +59,7 @@ class TestCommand extends Command
 
     /** @var int -- count of passed tests in a single test class */
     protected $passed = 0;
-    
+
     /** @var int -- count of failed tests in a single test class */
     protected $failed = 0;
 
@@ -104,9 +110,11 @@ class TestCommand extends Command
     protected function init()
     {
         // $this->addOption('f|failed',  'Show failed tests');
-        $this->addOption('r|results', 'Returns the results as array');
-        // $this->addOption('s|skipped', 'Show skipped tests');
-        $this->addOption('t|testdox', 'Do not print the result of individual tests');
+        $this->addOption('i|individual', 'Result of an individual test only', '');
+        $this->addOption('f|filter',     'Filter the methods to be tested test only', '');
+        $this->addOption('r|results',    'Returns the results as array');
+        $this->addOption('t|testdox',    'Do not print the result of individual tests');
+
         $this->addOption('q|quite',   'Only prints the final result');
 
         $this->addArgument(
@@ -123,6 +131,8 @@ class TestCommand extends Command
     protected function configure()
     {
         $this->level        = $this->getOption('verbose');
+        $this->itest        = $this->getOption('individual');
+        $this->filter       = $this->getOption('filter');
         // $this->failed_only  = $this->getOption('failed');
         $this->testdox      = $this->getOption('testdox');
         $this->quite        = $this->getOption('quite');
@@ -203,11 +213,11 @@ class TestCommand extends Command
         $this->skipped_files++;
         $this->processDot("X", "bg_red, white");
         $this->processMessage($message, "black, bg_light_yellow");
-        
+
         $this->writeln();
     }
 
-    /** 
+    /**
      * Called when an exception is thrown by an assertion
      *
      * @param array $message
@@ -245,7 +255,7 @@ class TestCommand extends Command
             $this->writeln();
             return;
         }
-            
+
 
         if ($this->level && ($this->failed || $this->skipped)) {
             $this->write(" [", "dark");
@@ -375,7 +385,7 @@ class TestCommand extends Command
                     $this->write($k . ": " . $var, "magenta");
                 }
             }
-    
+
             if ($message['trace']) {
                 $this->writeln($message['trace'], "");
             }
@@ -399,9 +409,9 @@ class TestCommand extends Command
      */
     protected function accumulateResult(array $result)
     {
-        $passed = 
-        $failed = 
-        $skipped = 
+        $passed =
+        $failed =
+        $skipped =
         $skipped_methods = 0;
 
         foreach ($result as $k => $v) {
@@ -454,7 +464,7 @@ class TestCommand extends Command
         $this->writeln();
     }
 
-    /** 
+    /**
      * Test class notify with a notification message, which is processed
      * according to the message status
      *
@@ -497,7 +507,7 @@ class TestCommand extends Command
             case self::METHOD_EXCEPTION:
                 $this->processMethodSkipped($message);
                 break;
-    
+
             case self::FILE_EXCEPTION:
                 $this->processFileSkipped($message);
                 break;
@@ -570,8 +580,8 @@ class TestCommand extends Command
      * @param array  $options
      */
     protected function runMethodWithException(
-        $class, 
-        string $method, 
+        $class,
+        string $method,
         array $options
     )
     {
@@ -638,7 +648,7 @@ class TestCommand extends Command
                     throw new Exception("Source $key not defined!");
 
                 $source = str_replace('$this', '$class', $source);
-                eval('$source = ' . $source . ';');            
+                eval('$source = ' . $source . ';');
 
                 foreach ($source as $key) {
                     if ($throws) {
@@ -670,7 +680,7 @@ class TestCommand extends Command
         try {
             # setup
             $class->setup();
-            
+
             # write the title (removing the 'test')
             $this->writeMethod(substr($method, 4));
 
@@ -709,7 +719,7 @@ class TestCommand extends Command
         $this->skipped  = 0;
         $this->messages = [];
         $this->skipped_methods = 0;
-    }    
+    }
 
     /**
      * Process all the unit tests defined in the given file
@@ -755,10 +765,30 @@ class TestCommand extends Command
                 if (strpos($method, 'test') !== 0)
                     continue;
 
+                # if individual test is present, skip the rest
+                if ($this->itest !== "") {
+                    $i = strtolower("test" . preg_replace('|^test|', '', $this->itest));
+
+                    if ($i != strtolower($method))
+                        continue;
+                }
+
+                # if filter is present, filterout the methods not to be tested
+                if ($this->filter !== "") {
+                    preg_match(
+                        '|.*' . strtolower($this->filter) . '.*|Us',
+                        strtolower($method),
+                        $m
+                    );
+
+                    if (!$m)
+                        continue;
+                }
+
                 $m_options = $options[$method] ?? [];
                 $this->runMethodUnitTests($class, $method, $m_options);
             }
-            
+
             // $class->runUnitTests();
         } catch (Throwable $e) {
             $this->notify(
@@ -810,7 +840,7 @@ class TestCommand extends Command
 
         if (!$m)
             return [];
-        
+
         return $m[1];
     }
 
@@ -825,7 +855,7 @@ class TestCommand extends Command
      */
     protected function parseComment(string $comment): array
     {
-        $data = [];            
+        $data = [];
         preg_match_all('|\*\s*(\w*)\s*:\s(.*)\n|Us', $comment, $m);
 
         if (!$m)
@@ -834,7 +864,7 @@ class TestCommand extends Command
         foreach ($m[1] as $k => $v) {
             $data[$v] = $m[2][$k];
         }
-    
+
         return $data;
     }
 
@@ -848,7 +878,7 @@ class TestCommand extends Command
     {
         $regex = '|\/\*\*(.*)\*\/.*function\s*(\w.*)\(|Us';
         preg_match_all($regex, $contents, $m);
-    
+
         if (!$m)
             return [];
 
@@ -856,10 +886,10 @@ class TestCommand extends Command
 
         foreach ($m[2] as $k => $v) {
             preg_match('|^test.*$|Us', $v, $mm);
-            
+
             if (!$mm)
                 continue;
-            
+
             $comments[$v] = $this->parseComment($m[1][$k]);
         }
 
@@ -891,7 +921,7 @@ class TestCommand extends Command
                 ];
             } else {
                 $methods[$name] = [];
-            }   
+            }
         }
 
         return $methods;
@@ -906,18 +936,18 @@ class TestCommand extends Command
     protected function parseFile(string $file): array
     {
         $contents = file_get_contents($file);
-        
+
         $options = array_merge_recursive(
             $this->parseMethods($contents),
             $this->parseComments($contents)
         );
 
         return $options;
-    }    
+    }
 
     /**
-     * Main function consists of finding the test classes and processing each 
-     * file, and then printing a summry of totals at the end 
+     * Main function consists of finding the test classes and processing each
+     * file, and then printing a summry of totals at the end
      */
     public function main()
     {
@@ -942,15 +972,15 @@ class TestCommand extends Command
         }
 
         $summary = $this->accumulateResult($this->total);
-        
+
         # print the totals
         if (
             !$this->results_only
             && (
                 $this->quite
-                || !$this->level 
+                || !$this->level
                 || (
-                    $this->level 
+                    $this->level
                     && count($this->total) > 1
                 )
             )

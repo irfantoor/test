@@ -37,7 +37,7 @@ use Exception;
  */
 class Test
 {
-    const NAME        = "Unit Test";
+    const NAME        = "Irfan's Test : A super fast bare minimum testing suite";
     const DESCRIPTION = "and I test ....";
     const VERSION     = "0.7.8";
 
@@ -61,7 +61,7 @@ class Test
     protected static $server;
 
     /**
-     * Definition oof assertions, which are used for creating the definition
+     * Definition of assertions, which are used for creating the definition
      * of assertion function and its arguments. Keys help in creating a virtual
      * method, and the values help in creating the expression to evaluate and
      * the arguments required.

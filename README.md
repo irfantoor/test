@@ -1,6 +1,6 @@
-# IrfanTOOR\Test
+# Irfan's Test
 
-Bring back colours to your unit tests
+A super fast bare minimum testing suite
 
 Require it using composer:
 ```sh

@@ -22,7 +22,7 @@ use IrfanTOOR\Test;
 class TestCommand extends Command
 {
     const NAME        = "test";
-    const DESCRIPTION = "Bring back colours to your unit tests";
+    const DESCRIPTION = "Irfan's Test : A super fast bare minimum testing suite";
 
     /**
      * constants describing different assertion statuses
@@ -679,6 +679,7 @@ class TestCommand extends Command
         # call method
         try {
             # setup
+            $class->cleanup();
             $class->setup();
 
             # write the title (removing the 'test')

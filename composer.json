@@ -1,6 +1,6 @@
 {
     "name": "irfantoor/test",
-    "description": "Bring back colours to your unit tests",
+    "description": "Irfan's Test : A super fast bare minimum testing suite",
     "type": "library",
     "keywords": ["php", "colorful", "unit", "test"],
     "license": "MIT",

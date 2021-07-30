@@ -679,7 +679,6 @@ class TestCommand extends Command
         # call method
         try {
             # setup
-            $class->cleanup();
             $class->setup();
 
             # write the title (removing the 'test')

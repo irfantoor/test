@@ -653,7 +653,7 @@ class TestTheTest extends Test
     function testAssertNotFile()
     {
         $this->assertNotFile(dirname(__FILE__) . '/');
-        $this->assertNotFile('/');
+        $this->assertNotFile(__DIR__);
     }
 
     function testAssertLink()

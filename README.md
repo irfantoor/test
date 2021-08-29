@@ -27,9 +27,9 @@ $ ./vendor/bin/test
 An example php file, is included here to serve as a fast example of how you can use the
 unit tests.
 
-Filename: examples/TestMyClass.php
+Filename: examples/MyClassTest.php
 Note: filename must match with the test class name, i.e. the filename implies that the test class
-defined int the file is: TestMyClass
+defined int the file is: MyClassTest
 
 ```php
 <?php
@@ -154,7 +154,7 @@ class MyClassTest extends Test
         # filesystem
         $this->assertDir(__DIR__);
         $this->assertNotDir(__FILE__);
-        $this->assertExecutable('/bin/ls');
+        $this->assertExecutable(dirname(__DIR__) . '/test');
         $this->assertNotExecutable(__FILE__);
         $this->assertFile(__FILE__);
         $this->assertNotFile(__DIR__);
@@ -163,7 +163,7 @@ class MyClassTest extends Test
         $this->assertReadable(__FILE__);
         $this->assertNotReadable('unknown');
         $this->assertWritable(__FILE__);
-        $this->assertNotWritable('/etc/passwd');
+        $this->assertNotWritable(dirname(__FILE__) . '/not_writable');
         $this->assertWriteable(__FILE__);
         $this->assertNotWriteable('unknown');
 
@@ -173,6 +173,11 @@ class MyClassTest extends Test
         $this->assertEquals(
             'Too few arguments to function IrfanTOOR\Test::assertEquals()',
             'Too few arguments to function IrfanTOOR\Test::assertEquals() -');
+    }
+
+    function testTodo()
+    {
+        $this->assertTodo('This comment must appear as a todo');
     }
 
     function testSkip()
@@ -242,20 +247,21 @@ class MyClassTest extends Test
 ```
 
 ```sh
-$ ./test examples/MyClassTest.php
-test 1.0 alfa
+$ ./test -v examples/MyClassTest.php
+test 0.8
 and I test ....
 
 MyClassTest.php
- [ 56] Examples .................................F..F.......SS..............FF
- [  0] Skip S
+ [ 56] Examples .................................F..F.......SS..............FF [4, 2]
+ [  0] Todo T [1]
+ [  0] Skip S [1]
  [  0] MethodSkip M
  [  1] ExceptionThrown .
  [  2] ExceptionThrownWithMessage ..
  [  3] Source ...
  [  3] ExceptionWithSource ...
  [  6] ExceptionWithSourceAndMessage ......
-   71 passed  4 failed  3 skipped   1 method skipped
+   71 passed  4 failed  3 skipped  1 todo   1 method skipped
 ```
 
 You can try running the test, by increasing the verbosity level, which will add some additional
@@ -278,6 +284,5 @@ $ ./test -vvv examples/MyClassTest.php
 $ ./test -vvv -i ExceptionThrownWithMessage examples/MyClassTest.php
 $ ./test -vvv -f exception examples/MyClassTest.php
 
-NOTE: both i and f take the value, which is case insensitive.
-
+NOTE: The values provided to the options -i and -f are case-insensitive
 ```

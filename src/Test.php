@@ -53,6 +53,7 @@ class Test
     const ARGUMENTS_COUNT_ERROR   = -2; # Called with bad count of arguments
     const ASSERTION_UNKNOWN       = -3; # Not defined in the list of assertions
     const ASSERTION_MISMATCH      = -4; # Not even an assertion
+    const ASSERTION_TODO          = -5; # An assertion todo
 
     /**
      * Any class capable of receiving notification message through a function :
@@ -148,6 +149,9 @@ class Test
 
         # exception case - i.e. to catch if a defined expression is not valid
         'RaiseException'   => '$callable()',
+
+        # placeholder for real assertions todo.
+        'Todo' => 'IrfanTOOR\Test::todo($comment)',
     ];
 
     /**
@@ -265,6 +269,16 @@ class Test
         # assign the arguments to their respective variables
         foreach ($args_exp as $k => $v) {
             $$v = $args[$k];
+        }
+
+        # if its todo
+        if ($key === 'Todo') {
+            return [
+                'status' => self::ASSERTION_TODO,
+                'line'   => $line,
+                'method' => $method,
+                'args'   => $args,
+            ];
         }
 
         # evaluate the associated expression

@@ -27,8 +27,8 @@ class TestCommand extends Command
     /**
      * constants describing different assertion statuses
      */
-    const FILE_EXCEPTION   = -5; # file including the class could not be loaded
-    const METHOD_EXCEPTION = -6; # some method in the file throws an exception
+    const FILE_EXCEPTION   = -10; # file including the class could not be loaded
+    const METHOD_EXCEPTION = -11; # some method in the file throws an exception
 
     /** @var string -- root path */
     protected $root;
@@ -68,6 +68,9 @@ class TestCommand extends Command
 
     /** @var int -- total count of skipped methods in a single test class */
     protected $skipped_methods = 0;
+
+    /** @var int -- total count of tests todo in a single test class */
+    protected $todo = 0;
 
     /** @var bool -- wether the test class was skipped, e.g. caused an eception while loading */
     protected $file_skipped = false;
@@ -190,6 +193,18 @@ class TestCommand extends Command
     }
 
     /**
+     * Called when an assertion is a todo
+     *
+     * @param array $message
+     */
+    protected function processTodo(array $message)
+    {
+        $this->todo++;
+        $this->processDot("T", "dark");
+        $this->processMessage($message, "dark");
+    }
+
+    /**
      * Called when an method is skipped
      *
      * @param array $message
@@ -256,8 +271,7 @@ class TestCommand extends Command
             return;
         }
 
-
-        if ($this->level && ($this->failed || $this->skipped)) {
+        if ($this->level && ($this->failed || $this->skipped || $this->todo)) {
             $this->write(" [", "dark");
 
             $sep = "";
@@ -269,6 +283,11 @@ class TestCommand extends Command
             if ($this->skipped) {
                 $this->write($sep);
                 $this->write($this->skipped, "yellow");
+            }
+
+            if ($this->todo) {
+                $this->write($sep);
+                $this->write($this->todo, "dark");
             }
 
             $this->write("]", "dark");
@@ -412,12 +431,14 @@ class TestCommand extends Command
         $passed =
         $failed =
         $skipped =
+        $todo =
         $skipped_methods = 0;
 
         foreach ($result as $k => $v) {
             $passed  += $v['passed'] ?? 0;
             $failed  += $v['failed'] ?? 0;
             $skipped += $v['skipped'] ?? 0;
+            $todo += $v['todo'] ?? 0;
             $skipped_methods += $v['skipped_methods'] ?? 0;
         }
 
@@ -425,6 +446,7 @@ class TestCommand extends Command
             'passed' => $passed,
             'failed' => $failed,
             'skipped' => $skipped,
+            'todo'    => $todo,
             'skipped_methods' => $skipped_methods,
             'file_skipped' => $this->file_skipped,
         ];
@@ -451,6 +473,10 @@ class TestCommand extends Command
             $this->write(sprintf(" %d skipped ", $skipped), "black, bg_light_yellow");
         }
 
+        if ($todo) {
+            $this->write(sprintf(" %d todo ", $todo), "dark");
+        }
+
         $this->write(" ");
 
         if ($skipped_methods) {
@@ -475,6 +501,11 @@ class TestCommand extends Command
         $this->last_message = $message;
 
         switch ($message['status']) {
+            case Test::ASSERTION_TODO:
+                $message['message'] = "todo -- " . $message['args'][0];
+                $this->processTodo($message);
+                break;
+
             case Test::ASSERTION_PASSED:
                 $this->processPassed($message);
                 break;
@@ -710,6 +741,7 @@ class TestCommand extends Command
             'passed'  => $this->passed,
             'failed'  => $this->failed,
             'skipped' => $this->skipped,
+            'todo'    => $this->todo,
             'skipped_methods' => $this->skipped_methods,
         ];
 
@@ -717,6 +749,7 @@ class TestCommand extends Command
         $this->passed   = 0;
         $this->failed   = 0;
         $this->skipped  = 0;
+        $this->todo     = 0;
         $this->messages = [];
         $this->skipped_methods = 0;
     }

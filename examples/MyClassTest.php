@@ -42,7 +42,7 @@ class MyClassTest extends Test
         # same
         $this->assertSame($some, $class);
         $this->assertNotSame($some, $somemore);
-        
+
         # array
         $this->assertArray([]);
         $this->assertNotArray("I'm not an array");
@@ -120,7 +120,7 @@ class MyClassTest extends Test
         # filesystem
         $this->assertDir(__DIR__);
         $this->assertNotDir(__FILE__);
-        $this->assertExecutable('/bin/ls');
+        $this->assertExecutable(dirname(__DIR__) . '/test');
         $this->assertNotExecutable(__FILE__);
         $this->assertFile(__FILE__);
         $this->assertNotFile(__DIR__);
@@ -129,7 +129,7 @@ class MyClassTest extends Test
         $this->assertReadable(__FILE__);
         $this->assertNotReadable('unknown');
         $this->assertWritable(__FILE__);
-        $this->assertNotWritable('/etc/passwd');
+        $this->assertNotWritable(dirname(__FILE__) . '/not_writable');
         $this->assertWriteable(__FILE__);
         $this->assertNotWriteable('unknown');
 
@@ -139,6 +139,11 @@ class MyClassTest extends Test
         $this->assertEquals(
             'Too few arguments to function IrfanTOOR\Test::assertEquals()',
             'Too few arguments to function IrfanTOOR\Test::assertEquals() -');
+    }
+
+    function testTodo()
+    {
+        $this->assertTodo('This comment must appear as a todo');
     }
 
     function testSkip()

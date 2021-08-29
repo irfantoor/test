@@ -303,8 +303,6 @@ class TestTheTest extends Test
         $this->assertNotEmpty($c);
     }
 
-
-
     function testAssertDouble()
     {
         $this->assertDouble(0.);
@@ -747,7 +745,7 @@ class TestTheTest extends Test
 
     function testAssertUploadedFile()
     {
-        // throw new Exception("todo - testAssertUploadedFile", 1);
+        $this->assertTodo("write tests to check the proper functioning of file uploading");
     }
 
     function testAssertNotUploadedFile()

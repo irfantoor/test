@@ -613,7 +613,7 @@ class TestTheTest extends Test
 
     function testAssertDir()
     {
-        $this->assertDir('/');
+        $this->assertDir(dirname(__FILE__) . '/');
         $this->assertDir(__DIR__);
         $this->assertDir(__DIR__ . '/');
         $this->assertDir(__DIR__ . '/.');
@@ -654,7 +654,7 @@ class TestTheTest extends Test
 
     function testAssertNotFile()
     {
-        $this->assertNotFile(__DIR__);
+        $this->assertNotFile(dirname(__FILE__) . '/');
         $this->assertNotFile('/');
     }
 

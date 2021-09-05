@@ -54,6 +54,9 @@ class TestCommand extends Command
     /** @var bool --  returns the result as an array */
     protected $results_only;
 
+    /** @var bool --  stop testing if the last test is not passed */
+    protected $stop;
+
     /** @var array -- assertion results of a single test class */
     protected $result = [];
 
@@ -116,6 +119,7 @@ class TestCommand extends Command
         $this->addOption('i|individual', 'Result of an individual test only', '');
         $this->addOption('f|filter',     'Filter the methods to be tested test only', '');
         $this->addOption('r|results',    'Returns the results as array');
+        $this->addOption('s|stop',       'stop testing if the last test is not passed');
         $this->addOption('t|testdox',    'Do not print the result of individual tests');
 
         $this->addOption('q|quite',   'Only prints the final result');
@@ -136,10 +140,10 @@ class TestCommand extends Command
         $this->level        = $this->getOption('verbose');
         $this->itest        = $this->getOption('individual');
         $this->filter       = $this->getOption('filter');
-        // $this->failed_only  = $this->getOption('failed');
         $this->testdox      = $this->getOption('testdox');
         $this->quite        = $this->getOption('quite');
         $this->results_only = $this->getOption('results');
+        $this->stop         = $this->getOption('stop');
 
         if ($this->results_only) {
             $this->quite = true;
@@ -543,6 +547,9 @@ class TestCommand extends Command
                 $this->processFileSkipped($message);
                 break;
         }
+
+        if (($message['status'] !== Test::ASSERTION_PASSED) && $this->stop)
+            exit;
     }
 
     /**

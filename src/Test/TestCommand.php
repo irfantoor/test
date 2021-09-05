@@ -57,6 +57,9 @@ class TestCommand extends Command
     /** @var bool --  stop testing if the last test is not passed */
     protected $stop;
 
+    /** @var bool --  status of the last test */
+    protected $last_failed = false;
+
     /** @var array -- assertion results of a single test class */
     protected $result = [];
 
@@ -502,6 +505,9 @@ class TestCommand extends Command
      */
     public function notify(array $message)
     {
+        if ($this->last_failed && $this->stop)
+            exit;
+
         $this->last_message = $message;
 
         switch ($message['status']) {
@@ -549,7 +555,7 @@ class TestCommand extends Command
         }
 
         if (($message['status'] !== Test::ASSERTION_PASSED) && $this->stop)
-            exit;
+            $this->last_failed = true;
     }
 
     /**

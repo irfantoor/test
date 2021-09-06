@@ -10,6 +10,7 @@
 
 namespace IrfanTOOR;
 
+use ReflectionClass;
 use Throwable;
 use Exception;
 
@@ -344,5 +345,21 @@ class Test
         } catch (Throwable $e) {
             return is_a($e, $class);
         }
+    }
+
+    /**
+     * Returns the properties of an object
+     *
+     * @param object $object
+     * @param string $property
+     */
+    public function getProperty(object $object, string $property)
+    {
+        $class = get_class($object);
+        $rc = new ReflectionClass($class);
+        $p = $rc->getProperty($property);
+        $p->setAccessible(true);
+
+        return $p->getValue($object);
     }
 }

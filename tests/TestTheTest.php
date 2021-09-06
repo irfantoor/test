@@ -945,6 +945,22 @@ class TestTheTest extends Test
         throw new Exception($a);
     }
 
+    function testGetProperty()
+    {
+        $s = self::$server;
+        try {
+            $root = $s->root;
+        } catch (\Throwable $th) {
+        }
+        $this->assertEquals('Cannot access protected property IrfanTOOR\\Test\\TestCommand::$root', $th->getMessage());
+        $root = $this->getProperty($s, 'root');
+        $this->assertString($root);
+        $this->assertNotZero(strlen($root));
+
+        $passed = $this->getProperty($s, 'passed');
+        $this->assertTrue(is_integer($passed));
+    }
+
     function getArgs()
     {
         return [

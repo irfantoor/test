@@ -112,7 +112,8 @@ class TestTheTest extends Test
         $this->assertEquals(null, 0);
         $this->assertEquals(null, "");
         $this->assertEquals(null, []);
-        $this->assertEquals(0, "");
+        $this->assertEquals(false, 0);
+        $this->assertEquals(true, 1);
     }
 
     function testAssertNotEquals()
@@ -439,31 +440,6 @@ class TestTheTest extends Test
         $this->assertNotNumeric(false);
         $this->assertNotNumeric([]);
         $this->assertNotNumeric(new Exception);
-    }
-
-    function testAssertReal()
-    {
-        $this->assertReal(0.);
-        $this->assertReal(0.0);
-        $this->assertReal(.1);
-        $this->assertReal(1.);
-        $this->assertReal(0 * 1e1);
-        $this->assertReal(0.1 * 1);
-        $this->assertReal(-0.1);
-        $this->assertReal(1-1.);
-    }
-
-    function testAssertNotReal()
-    {
-        $this->assertNotReal(0);
-        $this->assertNotReal(1);
-        $this->assertNotReal(100000000);
-        $this->assertNotReal(1-1);
-        $this->assertNotReal('');
-        $this->assertNotReal(null);
-        $this->assertNotReal(true);
-        $this->assertNotReal(false);
-        $this->assertNotReal([]);
     }
 
     function testAssertZero()

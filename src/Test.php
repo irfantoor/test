@@ -127,7 +127,6 @@ class Test
         'Nan'          => 'is_nan($value)',
         'Null'         => 'is_null($value)',
         'Numeric'      => 'is_numeric($value)',
-        'Real'         => 'is_real($value)',
         'Scalar'       => 'is_scalar($value)',
 
         # other variable types

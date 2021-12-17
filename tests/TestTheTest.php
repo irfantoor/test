@@ -61,7 +61,7 @@ class TestTheTest extends Test
         $this->c++;
     }
 
-    function testConstruct()
+    function test___construct()
     {
         # setup was called in the beginning
         $this->assertEquals(1, $this->c);
@@ -76,7 +76,7 @@ class TestTheTest extends Test
         $this->t = null;
     }
 
-    function testSetup()
+    function test_setup()
     {
         # construct is only called once
         $this->assertNull($this->t);
@@ -89,7 +89,7 @@ class TestTheTest extends Test
         $this->assertEquals(2, $this->c);
     }
 
-    function testAssertEquals()
+    function test_assertEquals()
     {
         $a = 'hello';
         $this->assertEquals('hello', $a);
@@ -116,7 +116,7 @@ class TestTheTest extends Test
         $this->assertEquals(true, 1);
     }
 
-    function testAssertNotEquals()
+    function test_assertNotEquals()
     {
         $a = 6;
         $b = 6;
@@ -133,7 +133,7 @@ class TestTheTest extends Test
         $this->assertNotEquals("", []);
     }
 
-    function testAssertSame()
+    function test_assertSame()
     {
         $a = 6;
         $b = 6;
@@ -148,7 +148,7 @@ class TestTheTest extends Test
         $this->assertSame($e, $f);
     }
 
-    function testAssertNotSame()
+    function test_assertNotSame()
     {
         $b = 6;
         $this->assertNotSame('6', $b);
@@ -164,7 +164,7 @@ class TestTheTest extends Test
         $this->assertNotSame(null, '');
     }
 
-    function testAssertArray()
+    function test_assertArray()
     {
         $this->assertArray([]);
         $this->assertArray(['hello', 'world']);
@@ -175,7 +175,7 @@ class TestTheTest extends Test
         $this->assertArray([$this, 'testAssertArray']);
     }
 
-    function testAssertNotArray()
+    function test_assertNotArray()
     {
         $this->assertNotArray(true);
         $this->assertNotArray(false);
@@ -189,7 +189,7 @@ class TestTheTest extends Test
         $this->assertNotArray(new Exception);
     }
 
-    function testAssertArrayHasKey()
+    function test_assertArrayHasKey()
     {
         $this->assertArrayHasKey(['zero'], '0');
         $this->assertArrayHasKey(['zero'], '0');
@@ -199,7 +199,7 @@ class TestTheTest extends Test
         $this->assertArrayHasKey($_SERVER, 'argv');
     }
 
-    function testAssertBool()
+    function test_assertBool()
     {
         $this->assertBool(true);
         $this->assertBool(false);
@@ -207,7 +207,7 @@ class TestTheTest extends Test
         $this->assertBool(!true);
     }
 
-    function testAssertNotBool()
+    function test_assertNotBool()
     {
         $this->assertNotBool(null);
         $this->assertNotBool(0);
@@ -219,7 +219,7 @@ class TestTheTest extends Test
         $this->assertNotBool(new Exception);
     }
 
-    function testAssertTrue()
+    function test_assertTrue()
     {
         $this->assertTrue(true);
         $this->assertTrue(!false);
@@ -230,7 +230,7 @@ class TestTheTest extends Test
         $this->assertTrue(0 !== 1);
     }
 
-    function testAssertFalse()
+    function test_assertFalse()
     {
         $this->assertFalse(false);
         $this->assertFalse(!true);
@@ -241,7 +241,7 @@ class TestTheTest extends Test
         $this->assertFalse(0 === 1);
     }
 
-    function testAssertNull()
+    function test_assertNull()
     {
         $this->assertNull(NULL);
 
@@ -249,7 +249,7 @@ class TestTheTest extends Test
         $this->assertNull($a);
     }
 
-    function testAssertNotNull()
+    function test_assertNotNull()
     {
         $this->assertNotNull(0);
         $this->assertNotNull('');
@@ -258,7 +258,7 @@ class TestTheTest extends Test
         $this->assertNotNull([null]);
     }
 
-    function testAssertString()
+    function test_assertString()
     {
         $this->assertString('');
         $this->assertString(' ');
@@ -273,7 +273,7 @@ class TestTheTest extends Test
         $this->assertString($e->fg());
     }
 
-    function testAssertNotString()
+    function test_assertNotString()
     {
         $this->assertNotString(null);
         $this->assertNotString(0);
@@ -285,14 +285,14 @@ class TestTheTest extends Test
         $this->assertNotString($c);
     }
 
-    function testAssertEmpty()
+    function test_assertEmpty()
     {
         $this->assertEmpty('');
         $this->assertEmpty([]);
         $this->assertEmpty(null);
     }
 
-    function testAssertNotEmpty()
+    function test_assertNotEmpty()
     {
         $this->assertNotEmpty(' ');
         $this->assertNotEmpty([0]);
@@ -304,7 +304,7 @@ class TestTheTest extends Test
         $this->assertNotEmpty($c);
     }
 
-    function testAssertDouble()
+    function test_assertDouble()
     {
         $this->assertDouble(0.);
         $this->assertDouble(0.0);
@@ -316,7 +316,7 @@ class TestTheTest extends Test
         $this->assertDouble(1-1.);
     }
 
-    function testAssertNotDouble()
+    function test_assertNotDouble()
     {
         $this->assertNotDouble(0);
         $this->assertNotDouble(1);
@@ -324,7 +324,7 @@ class TestTheTest extends Test
         $this->assertNotDouble(1-1);
     }
 
-    function testAssertFloat()
+    function test_assertFloat()
     {
         $this->assertFloat(0.);
         $this->assertFloat(0.0);
@@ -336,7 +336,7 @@ class TestTheTest extends Test
         $this->assertFloat(1-1.);
     }
 
-    function testAssertNotFloat()
+    function test_assertNotFloat()
     {
         $this->assertNotFloat(0);
         $this->assertNotFloat(1);
@@ -344,7 +344,7 @@ class TestTheTest extends Test
         $this->assertNotFloat(1-1);
     }
 
-    function testAssertInt()
+    function test_assertInt()
     {
         $this->assertInt(0);
         $this->assertInt(1);
@@ -355,7 +355,7 @@ class TestTheTest extends Test
         $this->assertInt((int) '1234');
     }
 
-    function testAssertNotInt()
+    function test_assertNotInt()
     {
         $this->assertNotInt(0.);
         $this->assertNotInt(1.);
@@ -368,7 +368,7 @@ class TestTheTest extends Test
         $this->assertNotInt('');
     }
 
-    function testAssertInteger()
+    function test_assertInteger()
     {
         $this->assertInteger(0);
         $this->assertInteger(1);
@@ -379,7 +379,7 @@ class TestTheTest extends Test
         $this->assertInteger((integer) '1234');
     }
 
-    function testAssertNotInteger()
+    function test_assertNotInteger()
     {
         $this->assertNotInteger(0.);
         $this->assertNotInteger(1.);
@@ -392,7 +392,7 @@ class TestTheTest extends Test
         $this->assertNotInteger('');
     }
 
-    function testAssertLong()
+    function test_assertLong()
     {
         $this->assertLong(0);
         $this->assertLong(1);
@@ -403,7 +403,7 @@ class TestTheTest extends Test
         $this->assertLong((int) '1234');
     }
 
-    function testAssertNotLong()
+    function test_assertNotLong()
     {
         $this->assertNotLong(0.);
         $this->assertNotLong(1.);
@@ -416,7 +416,7 @@ class TestTheTest extends Test
         $this->assertNotLong('');
     }
 
-    function testAssertNumeric()
+    function test_assertNumeric()
     {
         $this->assertNumeric(0);
         $this->assertNumeric(0.);
@@ -432,7 +432,7 @@ class TestTheTest extends Test
         $this->assertNumeric((float) 123.456);
     }
 
-    function testAssertNotNumeric()
+    function test_assertNotNumeric()
     {
         $this->assertNotNumeric(null);
         $this->assertNotNumeric('');
@@ -442,7 +442,7 @@ class TestTheTest extends Test
         $this->assertNotNumeric(new Exception);
     }
 
-    function testAssertZero()
+    function test_assertZero()
     {
         $this->assertZero(0);
         $this->assertZero(0.);
@@ -456,7 +456,7 @@ class TestTheTest extends Test
         $this->assertZero($a);
     }
 
-    function testAssertNotZero()
+    function test_assertNotZero()
     {
         $this->assertNotZero(null);
         $this->assertNotZero(1);
@@ -469,7 +469,7 @@ class TestTheTest extends Test
         $this->assertNotZero($a);
     }
 
-    function testAssertCallable()
+    function test_assertCallable()
     {
         $this->assertCallable(function(){});
 
@@ -480,7 +480,7 @@ class TestTheTest extends Test
         $this->assertCallable([$this, 'testAssertCallable']);
     }
 
-    function testAssertNotCallable()
+    function test_assertNotCallable()
     {
         $e = new ExtendedClass;
         $this->assertNotCallable([$e, 'ff']);
@@ -498,7 +498,7 @@ class TestTheTest extends Test
         $this->assertNotCallable(new Exception);
     }
 
-    function testAssertObject()
+    function test_assertObject()
     {
         $d = new ExtendedClass;
         $this->assertObject($d);
@@ -506,7 +506,7 @@ class TestTheTest extends Test
         $this->assertObject($this);
     }
 
-    function testAssertNotObject()
+    function test_assertNotObject()
     {
         $this->assertNotObject(null);
         $this->assertNotObject(0);
@@ -518,7 +518,7 @@ class TestTheTest extends Test
         $this->assertNotObject([]);
     }
 
-    function testAssertMethod()
+    function test_assertMethod()
     {
         $object = new ExtendedClass();
 
@@ -526,7 +526,7 @@ class TestTheTest extends Test
         $this->assertMethod($object, 'gf');
     }
 
-    function testAssertNotMethod()
+    function test_assertNotMethod()
     {
         $object = new ExtendedClass();
 
@@ -534,7 +534,7 @@ class TestTheTest extends Test
         $this->assertNotMethod($object, 'hg');
     }
 
-    function testAssertResource()
+    function test_assertResource()
     {
         $fp = fopen(__FILE__, 'r');
         $this->assertResource($fp);
@@ -545,7 +545,7 @@ class TestTheTest extends Test
         $this->assertResource(STDOUT);
     }
 
-    function testAssertNotResource()
+    function test_assertNotResource()
     {
         $fp = fopen(__FILE__, 'r');
         fclose($fp);
@@ -560,7 +560,7 @@ class TestTheTest extends Test
         $this->assertNotResource(false);
     }
 
-    function testAssertScalar()
+    function test_assertScalar()
     {
         $a = ['HELLO', 'WORLD'];
         $this->assertScalar(self::HELLO);
@@ -573,7 +573,7 @@ class TestTheTest extends Test
         $this->assertScalar(false);
     }
 
-    function testAssertNotScalar()
+    function test_assertNotScalar()
     {
         $this->assertNotScalar(null);
         $this->assertNotScalar([]);
@@ -585,7 +585,7 @@ class TestTheTest extends Test
         $this->assertNotScalar(STDOUT);
     }
 
-    function testAssertDir()
+    function test_assertDir()
     {
         $this->assertDir(dirname(__FILE__) . '/');
         $this->assertDir(__DIR__);
@@ -595,7 +595,7 @@ class TestTheTest extends Test
         $this->assertDir(dirname(__FILE__));
     }
 
-    function testAssertNotDir()
+    function test_assertNotDir()
     {
         $d = [__DIR__, '--'];
         $this->assertNotDir($d[0] . $d[1]);
@@ -611,35 +611,35 @@ class TestTheTest extends Test
         $this->assertNotDir(new Exception);
     }
 
-    function testAssertExecutable()
+    function test_assertExecutable()
     {
         $this->assertExecutable(dirname(__DIR__) . '/test');
     }
 
-    function testAssertNotExecutable()
+    function test_assertNotExecutable()
     {
         $this->assertNotExecutable(__FILE__);
     }
 
-    function testAssertFile()
+    function test_assertFile()
     {
         $this->assertFile(__FILE__);
     }
 
-    function testAssertNotFile()
+    function test_assertNotFile()
     {
         $this->assertNotFile(dirname(__FILE__) . '/');
         $this->assertNotFile(__DIR__);
     }
 
-    function testAssertLink()
+    function test_assertLink()
     {
         symlink(__FILE__, 'link');
         $this->assertLink('link');
         unlink('link');
     }
 
-    function testAssertNotLink()
+    function test_assertNotLink()
     {
         $this->assertNotLink(__FILE__);
         $this->assertNotLink(__DIR__);
@@ -647,7 +647,7 @@ class TestTheTest extends Test
         $this->assertNotLink(__DIR__ . '/..');
     }
 
-    function testAssertReadable()
+    function test_assertReadable()
     {
         symlink(__FILE__, 'link');
         file_put_contents('file', '');
@@ -661,7 +661,7 @@ class TestTheTest extends Test
         unlink('file');
     }
 
-    function testAssertNotReadable()
+    function test_assertNotReadable()
     {
         file_put_contents('file', '');
         chmod('file', 0x000);
@@ -673,7 +673,7 @@ class TestTheTest extends Test
         unlink('file');
     }
 
-    function testAssertWritble()
+    function test_assertWritble()
     {
         file_put_contents('file', '');
 
@@ -684,7 +684,7 @@ class TestTheTest extends Test
         unlink('file');
     }
 
-    function testAssertNotWritable()
+    function test_assertNotWritable()
     {
         file_put_contents('file', '');
         chmod('file', 0x000);
@@ -696,7 +696,7 @@ class TestTheTest extends Test
         unlink('file');
     }
 
-    function testAssertWriteble()
+    function test_assertWriteble()
     {
         file_put_contents('file', '');
 
@@ -707,7 +707,7 @@ class TestTheTest extends Test
         unlink('file');
     }
 
-    function testAssertNotWriteable()
+    function test_assertNotWriteable()
     {
         file_put_contents('file', '');
         chmod('file', 0x000);
@@ -719,12 +719,12 @@ class TestTheTest extends Test
         unlink('file');
     }
 
-    function testAssertUploadedFile()
+    function test_assertUploadedFile()
     {
         $this->assertTodo("write tests to check the proper functioning of file uploading");
     }
 
-    function testAssertNotUploadedFile()
+    function test_assertNotUploadedFile()
     {
         file_put_contents('file', '');
 
@@ -735,7 +735,7 @@ class TestTheTest extends Test
         unlink('file');
     }
 
-    function testAsserInstanceOf()
+    function test_asserInstanceOf()
     {
         $d = new ExtendedClass;
         $this->assertInstanceOf(ExtendedClass::class, $d);
@@ -745,7 +745,7 @@ class TestTheTest extends Test
         $this->assertImplements(SomeInterface::class, $d);
     }
 
-    function testAssertImplements()
+    function test_assertImplements()
     {
         # implements
         $c = new ExtendedClass;
@@ -758,7 +758,7 @@ class TestTheTest extends Test
         $this->assertNotImplements(Test::class, $this);
     }
 
-    function testAssertThrowable()
+    function test_assertThrowable()
     {
         foreach ($this->throwables as $t) {
             $this->assertThrowable($t);
@@ -772,7 +772,7 @@ class TestTheTest extends Test
         }
     }
 
-    function testAssertException()
+    function test_assertException()
     {
         $this->assertException($this->throwables['exception']);
         $this->assertException($this->throwables['throw_exception']);
@@ -786,7 +786,7 @@ class TestTheTest extends Test
         }
     }
 
-    function testAssertError()
+    function test_assertError()
     {
         $this->assertError($this->throwables['error']);
         $this->assertError($this->throwables['throw_error']);
@@ -801,7 +801,7 @@ class TestTheTest extends Test
         }
     }
 
-    function testAssertThrown()
+    function test_assertThrown()
     {
         foreach ($this->thrown as $th) {
             $this->assertThrown($th);
@@ -815,7 +815,7 @@ class TestTheTest extends Test
         }
     }
 
-    function testAssertThrownException()
+    function test_assertThrownException()
     {
         $this->assertThrownException($this->throwables['throw_exception']);
         $this->assertThrownException(function () { throw new Exception(""); });
@@ -829,7 +829,7 @@ class TestTheTest extends Test
         }
     }
 
-    function testAssertThrownError()
+    function test_assertThrownError()
     {
         $this->assertThrownError($this->throwables['throw_error']);
         $this->assertThrownError(function () { throw new Error(""); });
@@ -843,7 +843,7 @@ class TestTheTest extends Test
         }
     }
 
-    function testProcessAssertion()
+    function test_processAssertion()
     {
         // const ASSERTION_PASSED        =  1; # assertion passed
         $result  = $this->processAssertion('assertEquals', [1, 1]);
@@ -879,7 +879,7 @@ class TestTheTest extends Test
     /**
      * throws: Exception::class
      */
-    public function testExceptionThrown()
+    function test_ExceptionThrown()
     {
         throw new Exception("method throws an exception, it must not be skipped");
     }
@@ -888,7 +888,7 @@ class TestTheTest extends Test
      * throws: Exception::class
      * message: method throws an exception, it must not be skipped
      */
-    public function testExceptionThrownWithMessage()
+    function test_ExceptionThrownWithMessage()
     {
         throw new Exception("method throws an exception, it must not be skipped");
     }
@@ -897,7 +897,7 @@ class TestTheTest extends Test
      * Single parameter
      * a: $this->getArgs()
      */
-    public function testSource($a)
+    function test_Source($a)
     {
         $this->assertNotNull($a);
     }
@@ -906,7 +906,7 @@ class TestTheTest extends Test
      * throws: Exception::class
      * a: $this->getArgs()
      */
-    public function testExceptionWithSource($a)
+    function test_ExceptionWithSource($a)
     {
         throw new Exception($a);
     }
@@ -916,12 +916,12 @@ class TestTheTest extends Test
      * message: {$a}
      * a: $this->getArgs()
      */
-    public function testExceptionWithSourceAndMessage($a)
+    function test_ExceptionWithSourceAndMessage($a)
     {
         throw new Exception($a);
     }
 
-    function testGetProperty()
+    function test_GetProperty()
     {
         $s = self::$server;
         try {

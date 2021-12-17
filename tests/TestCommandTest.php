@@ -6,7 +6,7 @@ use IrfanTOOR\Test;
 
 class TestCommandTest extends Test
 {
-    function testInstance()
+    function test_instance()
     {
         $cmd = new TestCommand();
 
@@ -20,7 +20,7 @@ class TestCommandTest extends Test
         call_unknown();
     }
 
-    function testCanSkipAMethodThrowingException()
+    function test_Can_skip_a_method_throwing_Exception()
     {
         $cmd = new TestCommand();
 
@@ -46,7 +46,7 @@ class TestCommandTest extends Test
         );
     }
 
-    function testCanSkipAnAbsentFile()
+    function test_Can_skip_an_unknown_test_file()
     {
         $cmd = new TestCommand();
 
@@ -72,7 +72,7 @@ class TestCommandTest extends Test
         );
     }
 
-    function testCanSkipAFileThrowingException()
+    function test_Can_skip_a_file_throwing_Exception_while_inclusion()
     {
         $cmd = new TestCommand(__DIR__);
 

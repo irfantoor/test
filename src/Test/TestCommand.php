@@ -361,6 +361,9 @@ class TestCommand extends Command
         if ($this->quite)
             return;
 
+        # strip test, and replace _ with spaces
+        $method = preg_replace('|^test(_)?|us', '', $method);
+        $method = str_replace('_', ' ', $method);
         $this->write($method . " ", $this->noansi ? null : "green");
     }
 
@@ -726,7 +729,7 @@ class TestCommand extends Command
             $class->setup();
 
             # write the title (removing the 'test')
-            $this->writeMethod(substr($method, 4));
+            $this->writeMethod($method);
 
             $this->runMethod($class, $method, $options);
         } catch (Throwable $e) {

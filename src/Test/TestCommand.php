@@ -364,7 +364,7 @@ class TestCommand extends Command
         # strip test, and replace _ with spaces
         $method = preg_replace('|^test(_)?|us', '', $method);
         $method = str_replace('_', ' ', $method);
-        $this->write($method . " ", $this->noansi ? null : "green");
+        $this->write($method . " ", "green");
     }
 
     /**

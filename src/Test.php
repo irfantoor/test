@@ -40,7 +40,7 @@ class Test
 {
     const NAME        = "Irfan's Test : A super fast bare minimum testing suite";
     const DESCRIPTION = "and I test ....";
-    const VERSION     = "0.8";
+    const VERSION     = "0.8.2";
 
     /**
      * Constants describing different assertion statuses
